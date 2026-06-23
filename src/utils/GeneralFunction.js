@@ -7,9 +7,14 @@ export const handleAuthTokens = (jwtToken) => {
   }
 
   try {
-    const tokenObject = JSON.parse(jwtToken);
+    const tokenObject = typeof jwtToken === 'string' ? JSON.parse(jwtToken) : jwtToken;
     const accessToken = tokenObject.access_token;
     const refreshToken = tokenObject.refresh_token;
+
+    if (!accessToken) {
+      console.error("No access_token found in JWT token object");
+      return;
+    }
 
     localStorage.setItem("access_token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
@@ -27,13 +32,13 @@ export const handleAuthTokens = (jwtToken) => {
       "LAB-TECHNICIAN",
     ];
 
-    // Find first matching role
+    // Find first matching role (case-insensitive)
     const userRole = roles.find((role) =>
       allowedRoles.includes(role.toUpperCase())
     );
 
     if (userRole) {
-      localStorage.setItem("user_role", userRole);
+      localStorage.setItem("user_role", userRole.toUpperCase());
     } else {
       console.warn("No matching allowed role found in token payload:", roles);
     }

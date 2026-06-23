@@ -76,6 +76,8 @@ const CommonLogin = () => {
           navigate('/doctor/dashboard');
         } else if (role === 'LAB-TECHNICIAN') {
           navigate('/lab/dashboard');
+        } else {
+          setApiError('Login succeeded but user role was not found in the response. Please contact support.');
         }
       })
       .catch((error) => {

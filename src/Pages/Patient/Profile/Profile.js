@@ -23,6 +23,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Header from '../../../Components/Header/header';
 import TopNavbar from '../../../Components/TopNav/topNav';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { updatePatientDetailsThunk } from '../../../Redux/Modules/Patient/HomeThunk';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Footer from '../../../Components/Footer/footer';
@@ -54,25 +56,27 @@ const Profile = () => {
   });
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [rawUser, setRawUser] = useState(null);
+
+  const calculateAge = (dob) => {
+    if (!dob) return 'N/A';
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   useEffect(() => {
     const userId = localStorage.getItem('regNo');
     getPatientProfileById(userId)
       .then((val) => {
         const userObject = val.data;
-
-        // Calculate age from dateOfBirth
-        const calculateAge = (dob) => {
-          if (!dob) return 'N/A';
-          const birthDate = new Date(dob);
-          const today = new Date();
-          let age = today.getFullYear() - birthDate.getFullYear();
-          const m = today.getMonth() - birthDate.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-          }
-          return age;
-        };
+        setRawUser(userObject);
 
         const age = calculateAge(userObject.dateOfBirth);
 
@@ -134,9 +138,26 @@ const Profile = () => {
   };
 
   const handleEditSubmit = (updatedData) => {
-    console.log('Submitting updated profile:', updatedData);
-    // TODO: Call your API to update user profile
-    // After success, refresh profile data or update state accordingly
+    const regNo = localStorage.getItem('regNo');
+    dispatch(updatePatientDetailsThunk({ param: regNo, payload: updatedData }))
+      .unwrap()
+      .then(() => {
+        getPatientProfileById(regNo).then((val) => {
+          const userObject = val.data;
+          setRawUser(userObject);
+          const age = calculateAge(userObject.dateOfBirth);
+          setuserData([
+            { label: 'Name', value: userObject.name || 'N/A' },
+            { label: 'Gender', value: userObject.gender || 'N/A' },
+            { label: 'Age', value: age },
+            { label: 'Email', value: userObject.email || 'N/A' },
+            { label: 'Phone', value: userObject.mobileNo || 'N/A' },
+          ]);
+        });
+      })
+      .catch((err) => {
+        console.error('Failed to update profile:', err);
+      });
   };
   return (
     <>
@@ -192,14 +213,14 @@ const Profile = () => {
                       sx={{ width: 110, height: 110 }}
                     />
 
-                    {/* <Button
+                    <Button
                       endIcon={<EditIcon />}
                       onClick={() => {
                         setEditForm({
-                          name: userData.find((d) => d.label === 'Name')?.value || '',
-                          dob: '', // fetch and pass correct DOB from original userObject
-                          email: userData.find((d) => d.label === 'Email')?.value || '',
-                          gender: userData.find((d) => d.label === 'Gender')?.value || '',
+                          name: rawUser?.name || '',
+                          dob: rawUser?.dateOfBirth || '',
+                          email: rawUser?.email || '',
+                          gender: rawUser?.gender || '',
                         });
                         setEditOpen(true);
                       }}
@@ -213,7 +234,7 @@ const Profile = () => {
                       }}
                     >
                       Profile
-                    </Button> */}
+                    </Button>
                   </Box>
 
                   {/* User Details */}
