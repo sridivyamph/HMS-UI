@@ -18,7 +18,7 @@ import TranslateOutlinedIcon from '@mui/icons-material/TranslateOutlined';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateloginSignupAction } from '../../Redux/Modules/Patient/HomeSlice';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonIcon from '@mui/icons-material/Person';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
@@ -31,6 +31,7 @@ const Header = ({ handleOpen, showLogin = true }) => {
   const open = Boolean(anchorEl);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isUserLoggedIn } = useSelector((state) => state.home);
   const menuItems = ['Doctors', 'Department', 'About Us'];
 
@@ -59,6 +60,24 @@ const Header = ({ handleOpen, showLogin = true }) => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleNavClick = (item) => {
+    const map = {
+      Doctors: 'doctors-section',
+      Department: 'department-section',
+      'About Us': 'about-section',
+    };
+    const sectionId = map[item];
+    const isPatientPage = location.pathname === '/patient/login';
+    if (isPatientPage) {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate('/patient/login', { state: { scrollTo: sectionId } });
+    }
   };
 
   return (
@@ -101,6 +120,7 @@ const Header = ({ handleOpen, showLogin = true }) => {
             {menuItems.map((item, index) => (
               <Button
                 key={index}
+                onClick={() => handleNavClick(item)}
                 sx={{
                   color: '#2B2A29',
                   margin: '0 16px',
@@ -118,11 +138,9 @@ const Header = ({ handleOpen, showLogin = true }) => {
               <TranslateOutlinedIcon />
             </IconButton>
 
-            {/* Login with Dropdown */}
+            {/* Login Button */}
             {!isUserLoggedIn && (
               <Button
-                aria-controls='login-menu'
-                aria-haspopup='true'
                 onClick={() => handleLoginMenuClick('login')}
                 sx={{
                   color: '#04BA8E',
@@ -131,7 +149,6 @@ const Header = ({ handleOpen, showLogin = true }) => {
                   fontWeight: 500,
                   fontSize: '18px',
                 }}
-                endIcon={<ArrowDropDownIcon />}
               >
                 Login
               </Button>
@@ -278,6 +295,7 @@ const Header = ({ handleOpen, showLogin = true }) => {
                 {menuItems.map((item, index) => (
                   <Button
                     key={index}
+                    onClick={() => handleNavClick(item)}
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -296,16 +314,13 @@ const Header = ({ handleOpen, showLogin = true }) => {
                 {!isUserLoggedIn && (
                   <ListItem>
                     <Button
-                      aria-controls='login-menu'
-                      aria-haspopup='true'
-                      onClick={handleLoginMenuClick}
+                      onClick={() => handleLoginMenuClick('login')}
                       sx={{
                         color: '#04BA8E',
                         textTransform: 'capitalize',
                         fontWeight: 500,
                         fontSize: '18px',
                       }}
-                      endIcon={<ArrowDropDownIcon />}
                     >
                       Login
                     </Button>
@@ -315,9 +330,7 @@ const Header = ({ handleOpen, showLogin = true }) => {
                 {!isUserLoggedIn ? (
                   <ListItem>
                     <Button
-                      aria-controls='login-menu'
-                      aria-haspopup='true'
-                      onClick={handleLoginMenuClick}
+                      onClick={() => handleLoginMenuClick('signup')}
                       sx={{
                         color: '#04BA8E',
                         // margin: '0 16px',

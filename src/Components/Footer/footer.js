@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Grid, Typography, Link, Container } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import Logo from '../../assets/LogoWhite.png';
 
 const Footer = () => {
@@ -14,33 +15,6 @@ const Footer = () => {
       >
         <Container>
           <Grid container spacing={4} justifyContent='center'>
-            {/* About Us Section */}
-            <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column' }}>
-              {/* <Typography variant='body1'>
-                <img src={Logo} alt='Logo' height='40px' />
-              </Typography> */}
-              <Typography
-                variant='body1'
-                sx={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  mt: 1.5,
-                }}
-              >
-                About Us
-              </Typography>
-              <Typography
-                variant='body2'
-                sx={{
-                  fontSize: 16,
-                  mt: 1.5,
-                }}
-              >
-                Energetically reintermediate worldwide interfaces vis-a-vis emerging integrate
-                leadership skills
-              </Typography>
-            </Grid>
-
             {/* Services Section */}
             <Grid item xs={12} md={4}>
               <Typography
@@ -118,7 +92,7 @@ const Footer = () => {
                     fontSize: 16,
                   }}
                 >
-                  <Link href='#' color='inherit' underline='none'>
+                  <Link component={RouterLink} to='/service' color='inherit' underline='none'>
                     Service
                   </Link>
                 </Typography>
@@ -129,7 +103,7 @@ const Footer = () => {
                     fontSize: 16,
                   }}
                 >
-                  <Link href='#' color='inherit' underline='none'>
+                  <Link component={RouterLink} to='/gallery' color='inherit' underline='none'>
                     Gallery
                   </Link>
                 </Typography>
@@ -140,7 +114,7 @@ const Footer = () => {
                     fontSize: 16,
                   }}
                 >
-                  <Link href='#' color='inherit' underline='none'>
+                  <Link component={RouterLink} to='/blog' color='inherit' underline='none'>
                     Blog
                   </Link>
                 </Typography>
@@ -151,7 +125,7 @@ const Footer = () => {
                     fontSize: 16,
                   }}
                 >
-                  <Link href='#' color='inherit' underline='none'>
+                  <Link component={RouterLink} to='/careers' color='inherit' underline='none'>
                     Careers
                   </Link>
                 </Typography>
@@ -162,7 +136,7 @@ const Footer = () => {
                     fontSize: 16,
                   }}
                 >
-                  <Link href='#' color='inherit' underline='none'>
+                  <Link component={RouterLink} to='/contact-us' color='inherit' underline='none'>
                     Contact us
                   </Link>
                 </Typography>

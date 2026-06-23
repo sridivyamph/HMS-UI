@@ -60,12 +60,6 @@ const SignUpLoginDialog = ({ open, onClose }) => {
         maxWidth='xs'
         fullScreen={loginSignUpAction === 'register' ? true : false}
         sx={{
-          // '.MuiDialog-root': {
-          //   backgroundColor: 'red', // Backdrop color
-          // },
-          // '.MuiDialog-container': {
-          //   alignItems: 'flex-end', // Align to top of the screen
-          // },
           '.MuiDialog-paper': {
             padding: loginSignUpAction === 'register' ? '0' : '24px',
             borderRadius: loginSignUpAction === 'register' ? '0' : '32px',

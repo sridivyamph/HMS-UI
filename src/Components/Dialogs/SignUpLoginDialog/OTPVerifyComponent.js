@@ -140,7 +140,14 @@ const OTPVerifyComponent = ({ phoneNumber, onClose, loginSignUpAction }) => {
             </Typography>
           </Box>
 
-          <Box display='flex' gap={3} justifyContent='center' mt={2} mb={1}>
+          <Box
+            display='flex'
+            gap={{ xs: 1, sm: 3 }}
+            justifyContent='center'
+            mt={2}
+            mb={1}
+            sx={{ px: { xs: 0, sm: 2 } }}
+          >
             {otp.map((value, index) => (
               <TextField
                 key={index}
@@ -151,12 +158,12 @@ const OTPVerifyComponent = ({ phoneNumber, onClose, loginSignUpAction }) => {
                 variant='outlined'
                 sx={{
                   textAlign: 'center',
-                  width: '54px',
-                  height: '54px',
+                  width: { xs: '40px', sm: '54px' },
+                  height: { xs: '44px', sm: '54px' },
                   borderRadius: '8px',
                   '& .MuiInputBase-input': {
                     textAlign: 'center',
-                    padding: '10px',
+                    padding: { xs: '6px', sm: '10px' },
                   },
                 }}
                 inputProps={{ maxLength: 1 }}

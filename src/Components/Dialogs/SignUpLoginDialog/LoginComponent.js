@@ -22,7 +22,7 @@ const LoginComponent = ({ onClose, phoneNumber, setPhoneNumber, title }) => {
   const [phoneNumberError, setphoneNumberError] = useState('');
   const [error, setError] = useState('');
   const { appConfig, isConfigLoaded } = useSelector((state) => state.auth);
-  const hospitalId = appConfig?.hospitalId;
+  const hospitalId = appConfig?.hospitalId || 3;
   const onSubmit = (event) => {
     event.preventDefault();
     if (!phoneNumber) {
@@ -95,9 +95,9 @@ const LoginComponent = ({ onClose, phoneNumber, setPhoneNumber, title }) => {
                 country={country}
                 containerStyle={{
                   height: '40px',
-                  width: '350px',
+                  width: '100%',
                 }}
-                inputStyle={{ height: '40px', width: '350px' }}
+                inputStyle={{ height: '40px', width: '100%' }}
               />
             </FormControl>
             {/* Error Message */}

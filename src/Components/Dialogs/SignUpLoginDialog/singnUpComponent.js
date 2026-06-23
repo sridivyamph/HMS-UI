@@ -118,9 +118,9 @@ const SignupComponent = ({ open, onClose, phoneNumber, setPhoneNumber }) => {
                 country={country}
                 containerStyle={{
                   height: '40px',
-                  width: '350px',
+                  width: '100%',
                 }}
-                inputStyle={{ height: '40px', width: '350px' }}
+                inputStyle={{ height: '40px', width: '100%' }}
               />
             </FormControl>
 
