@@ -62,7 +62,7 @@ const CommonLogin = () => {
       username: userName.trim(),
       password: password.trim(),
     };
-    const param = appConfig.hospitalId;
+    const param = appConfig.hospitalId || 3;
 
     adminLogin(payload, param)
       .then((res) => {
