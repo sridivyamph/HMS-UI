@@ -133,10 +133,6 @@ const Header = ({ handleOpen, showLogin = true }) => {
               </Button>
             ))}
 
-            {/* Language Icon */}
-            <IconButton color='inherit' sx={{ marginLeft: 2, fontWeight: 500, fontSize: '18px' }}>
-              <TranslateOutlinedIcon />
-            </IconButton>
 
             {/* Login Button */}
             {!isUserLoggedIn && (
