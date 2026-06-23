@@ -110,9 +110,15 @@ export const homeSlice = createSlice({
         try {
           const base64payload = accessToken.split('.')[1];
           const decodePayload = JSON.parse(atob(base64payload));
-          const userRole = decodePayload.realm_access.roles[1];
-          localStorage.setItem('user_role', userRole);
-          state.userRole = userRole;
+          const roles = decodePayload.realm_access?.roles || [];
+          const allowedRoles = ['PATIENT', 'ADMIN', 'RECEPTIONIST', 'DOCTOR', 'LAB-TECHNICIAN'];
+          const userRole = roles.find((role) => allowedRoles.includes(role.toUpperCase()));
+          if (userRole) {
+            localStorage.setItem('user_role', userRole.toUpperCase());
+            state.userRole = userRole.toUpperCase();
+          } else {
+            console.warn('No matching role found in token payload:', roles);
+          }
         } catch (e) {
           console.log('Failed to decode user role', e);
         }
@@ -162,9 +168,15 @@ export const homeSlice = createSlice({
         try {
           const base64payload = accessToken.split('.')[1];
           const decodePayload = JSON.parse(atob(base64payload));
-          const userRole = decodePayload.realm_access.roles[1];
-          localStorage.setItem('user_role', userRole);
-          state.userRole = userRole;
+          const roles = decodePayload.realm_access?.roles || [];
+          const allowedRoles = ['PATIENT', 'ADMIN', 'RECEPTIONIST', 'DOCTOR', 'LAB-TECHNICIAN'];
+          const userRole = roles.find((role) => allowedRoles.includes(role.toUpperCase()));
+          if (userRole) {
+            localStorage.setItem('user_role', userRole.toUpperCase());
+            state.userRole = userRole.toUpperCase();
+          } else {
+            console.warn('No matching role found in token payload:', roles);
+          }
         } catch (e) {
           console.log('Failed to decode user role', e);
         }
