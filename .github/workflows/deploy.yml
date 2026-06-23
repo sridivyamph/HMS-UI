@@ -1,0 +1,32 @@
+name: Deploy UI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 2264
+
+          script: |
+            cd /home/zcareadmin/HMS-UI
+            git pull origin main            
+            docker build -t hms-ui .
+            docker stop hms-ui || true
+            docker rm hms-ui || true
+
+            docker run -d \
+              --name hms-ui \
+              --restart unless-stopped \
+              --network hms-network \
+              -p 3000:80 \
+              hms-ui
