@@ -20,7 +20,7 @@ import SignUpLoginDialog from '../../../Components/Dialogs/SignUpLoginDialog/Sig
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDoctorListThunk } from '../../../Redux/Modules/Patient/HomeThunk';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 // Styled container for the header section
 const HeaderContainer = styled(Box)(({ theme }) => ({
@@ -50,6 +50,7 @@ const services = [
 const PatientGuestVersion = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoginSignupDialogOpen, setLoginSignupDialogOpen] = useState(false);
   const [isSearching, setSearching] = useState(false);
   const [DocListLoad, setDocListLoad] = useState({ load: false, page: 0, size: 5 });
@@ -92,6 +93,19 @@ const PatientGuestVersion = () => {
       navigate('/patient/dashboard');
     }
   }, [isUserLoggedIn]);
+
+  useEffect(() => {
+    if (location.state?.scrollTo) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(location.state.scrollTo);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
+      navigate(location.pathname, { replace: true });
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   const handleSearch = (searchText) => {
     setsearchText(searchText);
@@ -190,7 +204,7 @@ const PatientGuestVersion = () => {
         </style>
       </Box>
       {/* <PromotionCards /> */}
-      <Container>
+      <Container id='department-section'>
         <HeaderContainer>
           <Typography
             variant='h4'
@@ -246,7 +260,7 @@ const PatientGuestVersion = () => {
 
       {!isSearching && (
         <>
-          <Container>
+          <Container id='doctors-section'>
             <Box
               sx={{
                 display: 'flex',
@@ -294,7 +308,9 @@ const PatientGuestVersion = () => {
           setLoginSignupDialogOpen(false);
         }}
       />
-      <WhyChooseUs />
+      <div id='about-section'>
+        <WhyChooseUs />
+      </div>
       <Footer />
     </>
   );

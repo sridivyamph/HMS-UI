@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import React, { Suspense, lazy, useEffect } from 'react';
 import Spinner from './Components/Backdrop/Backdrop';
+import BackToTop from './Components/BackToTop/BackToTop';
 import { useDispatch, useSelector } from 'react-redux';
 import ReceptionLanding from './Pages/Reception/Home/ReceptionLanding';
 import ViewPatientProfile from './Pages/Reception/Profiles/ViewPatientProfile';
@@ -38,6 +39,14 @@ const PatientDashboard = lazy(() => import('./Pages/Patient/Home/PatientDashboar
 const AddUser = lazy(() => import('./Pages/Admin/Adduser/Adduser'));
 const AdminDashboard = lazy(() => import('./Pages/Admin/Dashboard/AdminDashboard'));
 
+// PUBLIC PAGES
+const AboutUs = lazy(() => import('./Pages/Public/AboutUs'));
+const Service = lazy(() => import('./Pages/Public/Service'));
+const Gallery = lazy(() => import('./Pages/Public/Gallery'));
+const Blog = lazy(() => import('./Pages/Public/Blog'));
+const Careers = lazy(() => import('./Pages/Public/Careers'));
+const ContactUs = lazy(() => import('./Pages/Public/ContactUs'));
+
 // NO ROUTES FOUND
 const NotFound = lazy(() => import('./Components/NotFound/NotFound'));
 const Main = () => {
@@ -50,6 +59,7 @@ const Main = () => {
   return (
     <Suspense fallback={null}>
       <Spinner open={showBackdrop} />
+      <BackToTop />
       <Routes>
         <Route path='/patient/login' element={<PatientHome />} />
         <Route
@@ -187,6 +197,13 @@ const Main = () => {
             </ProtectedRoute>
           }
         ></Route>
+        {/* PUBLIC PAGES */}
+        <Route path='/about-us' element={<AboutUs />} />
+        <Route path='/service' element={<Service />} />
+        <Route path='/gallery' element={<Gallery />} />
+        <Route path='/blog' element={<Blog />} />
+        <Route path='/careers' element={<Careers />} />
+        <Route path='/contact-us' element={<ContactUs />} />
         {/* NO ROUTES FOUND */}
         <Route path='*' element={<NotFound />} />
       </Routes>

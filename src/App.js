@@ -1,6 +1,6 @@
 import { AppProvider } from './Context/appContext';
 import { HashRouter } from 'react-router-dom';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Provider } from 'react-redux';
 import store from './Redux/store';
 import { createTheme, StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
