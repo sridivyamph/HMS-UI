@@ -34,6 +34,7 @@ import Checkin from '../../../assets/checkin.png';
 import { IconButton } from '@mui/material';
 import DoctorsList from '../../../Components/DoctorsList/DoctorsList';
 import Footer from '../../../Components/Footer/footer';
+import WhyChooseUs from '../../../Components/whychoosUs/whychooseUs';
 import { useNavigate } from 'react-router-dom';
 import axios, { isCancel } from 'axios';
 import { Card, CardContent } from '@mui/material';
@@ -719,48 +720,50 @@ const PatientDashboard = () => {
         </Grid>
       </Container>
 
-      <Container sx={{ mt: 5 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
-            padding: { xs: '8px 16px', sm: '16px 24px' },
-            flexDirection: { xs: 'column', sm: 'row' },
-            textAlign: { xs: 'center', sm: 'left' },
-          }}
-        >
-          {/* Left side - Title and description */}
-          <Box sx={{ marginBottom: { xs: '12px', sm: 0 } }}>
-            {' '}
-            {/* Space for mobile only */}
-            <Typography
-              variant='h6'
-              component='div'
-              sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }}
-            >
-              Doctors
-            </Typography>
-            <Typography
-              variant='body2'
-              color='textSecondary'
-              sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}
-            >
-              Our team of experienced doctors are here to serve you
-            </Typography>
+      <div id='doctors-section'>
+        <Container sx={{ mt: 5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              padding: { xs: '8px 16px', sm: '16px 24px' },
+              flexDirection: { xs: 'column', sm: 'row' },
+              textAlign: { xs: 'center', sm: 'left' },
+            }}
+          >
+            {/* Left side - Title and description */}
+            <Box sx={{ marginBottom: { xs: '12px', sm: 0 } }}>
+              {' '}
+              {/* Space for mobile only */}
+              <Typography
+                variant='h6'
+                component='div'
+                sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }}
+              >
+                Doctors
+              </Typography>
+              <Typography
+                variant='body2'
+                color='textSecondary'
+                sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}
+              >
+                Our team of experienced doctors are here to serve you
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-      </Container>
-      <DoctorsList
+        </Container>
+        <DoctorsList
         // setLoginSignupDialogOpen={setLoginSignupDialogOpen}
         pagination={pagination}
         handlePageChange={handlePageChange}
         handleSizeChange={handleSizeChange}
       />
+      </div>
 
       {/* <PromotionCards /> */}
-      <Container>
+      <Container id='department-section'>
         <HeaderContainer>
           <Typography
             variant='h4'
@@ -814,6 +817,9 @@ const PatientDashboard = () => {
           ))}
         </Grid>
       </Container>
+      <div id='about-section'>
+        <WhyChooseUs />
+      </div>
       <Footer />
 
       {isCancelCoinfirmationDialog && (

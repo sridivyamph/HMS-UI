@@ -30,7 +30,7 @@ const DoctorRegistration = () => {
     username: '',
     emailId: '',
     // referenceType: '',
-    hospId: hospitalId,
+    hospId: 3,
     secondaryEmail: '',
     secondaryMob: '',
     // pincode: '',

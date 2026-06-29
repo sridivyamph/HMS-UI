@@ -63,18 +63,16 @@ const Header = ({ handleOpen, showLogin = true }) => {
   };
 
   const handleNavClick = (item) => {
-    const map = {
+    const sectionId = {
       Doctors: 'doctors-section',
       Department: 'department-section',
       'About Us': 'about-section',
-    };
-    const sectionId = map[item];
-    const isPatientPage = location.pathname === '/patient/login';
-    if (isPatientPage) {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
+    }[item];
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else if (isUserLoggedIn) {
+      navigate('/patient/dashboard');
     } else {
       navigate('/patient/login', { state: { scrollTo: sectionId } });
     }
