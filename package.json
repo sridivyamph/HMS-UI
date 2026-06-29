@@ -38,7 +38,6 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "https://gateway.zautomate.in",
   "eslintConfig": {
     "extends": [
       "react-app",
