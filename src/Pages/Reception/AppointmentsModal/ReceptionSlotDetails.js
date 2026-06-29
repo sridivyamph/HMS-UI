@@ -43,6 +43,7 @@ function ReceptionSlotDetails({
 }) {
   const dispatch = useDispatch();
   const [reasonForVisit, setReasonForVisit] = useState('');
+  const [bookingFor, setBookingFor] = useState('');
   const { doctorAvailableDates, doctorAvailableTimeSlots } = useSelector(
     (state) => state.home
   );
@@ -424,12 +425,18 @@ function ReceptionSlotDetails({
               }
             >
               <MenuItem value='Consultation'>Consultation</MenuItem>
-              <MenuItem value='Follow-up'>Fever</MenuItem>
-              <MenuItem value='Follow-up'> Blood pressure</MenuItem>
+              <MenuItem value='Fever'>Fever</MenuItem>
+              <MenuItem value='Blood pressure'>Blood pressure</MenuItem>
             </TextField>
           </Grid>
           <Grid item xs={6}>
-            <TextField fullWidth select label='Booking for'>
+            <TextField
+              fullWidth
+              select
+              label='Booking for'
+              value={bookingFor}
+              onChange={(e) => setBookingFor(e.target.value)}
+            >
               <MenuItem value='Self'>Self</MenuItem>
               <MenuItem value='Family'>Family</MenuItem>
             </TextField>

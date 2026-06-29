@@ -63,6 +63,25 @@ export const doctorSlice = createSlice({
       .addCase(appUserDataCall.rejected, (state, action) => {
         state.isLoading = false;
         state.isErrorFound = true;
+      })
+
+      .addCase(doctorLoginCall.pending, (state) => {
+        state.isLoading = true;
+        state.isErrorFound = false;
+        state.isNavigate = false;
+      })
+      .addCase(doctorLoginCall.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isLoginSuccess = true;
+        state.isNavigate = true;
+        state.isErrorFound = false;
+        state.doctorData = action.payload;
+      })
+      .addCase(doctorLoginCall.rejected, (state) => {
+        state.isLoading = false;
+        state.isLoginSuccess = false;
+        state.isNavigate = false;
+        state.isErrorFound = true;
       });
   },
 });

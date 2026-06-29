@@ -6,8 +6,6 @@ import {
   Typography,
   Avatar,
   Grid,
-  Link,
-  TextField,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -18,6 +16,9 @@ import {
   Menu,
   MenuItem,
   Skeleton,
+  Chip,
+  Paper,
+  TextField,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Header from '../../../Components/Header/header';
@@ -31,13 +32,17 @@ import Footer from '../../../Components/Footer/footer';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { getPatientProfileById, getUserAppointment } from '../../../Services/PatientServices';
 import CloseIcon from '@mui/icons-material/Close';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EditIcon from '@mui/icons-material/Edit';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import ScienceIcon from '@mui/icons-material/Science';
+import PersonIcon from '@mui/icons-material/Person';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import WcIcon from '@mui/icons-material/Wc';
+import CakeIcon from '@mui/icons-material/Cake';
 import EditProfileDialog from '../../../Components/Dialogs/EditPatientProfileDialog/EditPatientProfileDialog';
+
 const Profile = () => {
   const [userData, setuserData] = useState([]);
   const [anchorEl, setAnchorEl] = useState({});
@@ -45,8 +50,8 @@ const Profile = () => {
   const [prescriptionModal, setPrescriptionModal] = useState(false);
   const [prescription, setPrescriptionText] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [loadingUser, setLoadingUser] = useState(true); // added
-  const [loadingAppointments, setLoadingAppointments] = useState(true); // added
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -54,6 +59,8 @@ const Profile = () => {
     email: '',
     gender: '',
   });
+  const [userError, setUserError] = useState('');
+  const [appointmentError, setAppointmentError] = useState('');
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -73,6 +80,8 @@ const Profile = () => {
 
   useEffect(() => {
     const userId = localStorage.getItem('regNo');
+    setLoadingUser(true);
+    setUserError('');
     getPatientProfileById(userId)
       .then((val) => {
         const userObject = val.data;
@@ -81,15 +90,15 @@ const Profile = () => {
         const age = calculateAge(userObject.dateOfBirth);
 
         const userDetailsArray = [
-          { label: 'Name', value: userObject.name || 'N/A' },
-          { label: 'Gender', value: userObject.gender || 'N/A' },
-          { label: 'Age', value: age },
-          // { label: 'Occupation', value: userObject.occupation || 'N/A' },
-          { label: 'Email', value: userObject.email || 'N/A' },
-          { label: 'Phone', value: userObject.mobileNo || 'N/A' },
+          { label: 'Name', value: userObject.name || 'N/A', icon: <PersonIcon fontSize='small' /> },
+          { label: 'Gender', value: userObject.gender || 'N/A', icon: <WcIcon fontSize='small' /> },
+          { label: 'Age', value: age, icon: <CakeIcon fontSize='small' /> },
+          { label: 'Email', value: userObject.email || 'N/A', icon: <EmailIcon fontSize='small' /> },
+          { label: 'Phone', value: userObject.mobileNo || 'N/A', icon: <PhoneIcon fontSize='small' /> },
         ];
         setuserData(userDetailsArray);
       })
+      .catch(() => setUserError('Unable to load profile details. Please try again later.'))
       .finally(() => setLoadingUser(false));
   }, []);
 
@@ -98,6 +107,8 @@ const Profile = () => {
   }, []);
   const fetchAppointments = async () => {
     try {
+      setAppointmentError('');
+      setLoadingAppointments(true);
       const userId = localStorage.getItem('regNo');
       const payload = { param: userId };
       const postsResponse = await getUserAppointment(payload);
@@ -111,8 +122,8 @@ const Profile = () => {
         ...item,
       }));
       setAppointments(appointments);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch {
+      setAppointmentError('Unable to load visit history. Please try again later.');
     } finally {
       setLoadingAppointments(false);
     }
@@ -121,7 +132,6 @@ const Profile = () => {
   const formatAppointmentDate = (dateString) => {
     return new Date(dateString).toLocaleString('en-IN', {
       dateStyle: 'medium',
-      // timeStyle: "short",
     });
   };
   const handleClose = (index) => {
@@ -137,268 +147,367 @@ const Profile = () => {
     }));
   };
 
-  const handleEditSubmit = (updatedData) => {
+  const handleEditSubmit = async (updatedData) => {
     const regNo = localStorage.getItem('regNo');
-    dispatch(updatePatientDetailsThunk({ param: regNo, payload: updatedData }))
-      .unwrap()
-      .then(() => {
-        getPatientProfileById(regNo).then((val) => {
-          const userObject = val.data;
-          setRawUser(userObject);
-          const age = calculateAge(userObject.dateOfBirth);
-          setuserData([
-            { label: 'Name', value: userObject.name || 'N/A' },
-            { label: 'Gender', value: userObject.gender || 'N/A' },
-            { label: 'Age', value: age },
-            { label: 'Email', value: userObject.email || 'N/A' },
-            { label: 'Phone', value: userObject.mobileNo || 'N/A' },
-          ]);
-        });
-      })
-      .catch((err) => {
-        console.error('Failed to update profile:', err);
-      });
+    try {
+      await dispatch(updatePatientDetailsThunk({ param: regNo, payload: updatedData })).unwrap();
+      const val = await getPatientProfileById(regNo);
+      const userObject = val.data;
+      setRawUser(userObject);
+      const age = calculateAge(userObject.dateOfBirth);
+      setuserData([
+        { label: 'Name', value: userObject.name || 'N/A', icon: <PersonIcon fontSize='small' /> },
+        { label: 'Gender', value: userObject.gender || 'N/A', icon: <WcIcon fontSize='small' /> },
+        { label: 'Age', value: age, icon: <CakeIcon fontSize='small' /> },
+        { label: 'Email', value: userObject.email || 'N/A', icon: <EmailIcon fontSize='small' /> },
+        { label: 'Phone', value: userObject.mobileNo || 'N/A', icon: <PhoneIcon fontSize='small' /> },
+      ]);
+    } catch {
+      setUserError('Failed to update profile. Please try again.');
+    }
   };
+
+  const initials = rawUser?.name
+    ? rawUser.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U';
+
+  const upcomingAppts = appointments.filter((a) => new Date(a.bookingDate) >= new Date()).length;
+
   return (
     <>
       <TopNavbar />
       <Header />
-      <Box
-        sx={{
-          backgroundColor: '#F9F9F9',
-          mb: 6,
-        }}
-      >
+      <Box sx={{ backgroundColor: '#F5F7FA', minHeight: '100vh', pb: 6 }}>
         <Container>
-          <Box sx={{ display: 'flex', pt: 6 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', pt: 4, mb: 3 }}>
             <Button
-              onClick={() => {
-                navigate('/patient/dashboard');
-              }}
+              onClick={() => navigate('/patient/dashboard')}
+              sx={{ minWidth: 'auto', mr: 1, color: '#2B2A29' }}
             >
-              <ArrowBackIosIcon
-                sx={{
-                  marginLeft: '4px',
-                  color: '#2B2A29',
-                  fontSize: 24,
-                }}
-              />{' '}
-              <Typography sx={{ fontWeight: 600, color: '#2B2A29', fontSize: 24 }}>
-                My Profile
-              </Typography>
+              <ArrowBackIosIcon sx={{ fontSize: 20 }} />
             </Button>
+            <Typography sx={{ fontWeight: 700, color: '#1A1A2E', fontSize: 26 }}>
+              My Profile
+            </Typography>
           </Box>
 
-          <Grid container spacing={2} sx={{ mt: 5 }}>
-            <Grid item xs={3}>
-              <Card
+          {/* Profile Header Card */}
+          <Card
+            sx={{
+              borderRadius: 3,
+              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+              mb: 3,
+              background: 'linear-gradient(135deg, #04BA8E 0%, #029E76 100%)',
+              color: '#fff',
+            }}
+          >
+            <CardContent sx={{ p: 4 }}>
+              <Grid container alignItems='center' spacing={3}>
+                <Grid item xs={12} md={2} sx={{ textAlign: 'center' }}>
+                  <Avatar
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      fontSize: 36,
+                      fontWeight: 700,
+                      border: '3px solid rgba(255,255,255,0.5)',
+                      mx: 'auto',
+                    }}
+                  >
+                    {initials}
+                  </Avatar>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant='h5' fontWeight={700}>
+                    {rawUser?.name || 'User'}
+                  </Typography>
+                  <Typography sx={{ opacity: 0.85, mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <PhoneIcon sx={{ fontSize: 16 }} /> {rawUser?.mobileNo || 'N/A'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={4} sx={{ textAlign: { md: 'right' } }}>
+                  <Button
+                    variant='contained'
+                    startIcon={<EditIcon />}
+                    onClick={() => {
+                      setEditForm({
+                        name: rawUser?.name || '',
+                        dob: rawUser?.dateOfBirth || '',
+                        email: rawUser?.email || '',
+                        gender: rawUser?.gender || '',
+                      });
+                      setEditOpen(true);
+                    }}
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(8px)',
+                      color: '#fff',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderRadius: 2,
+                      px: 3,
+                      py: 1,
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                    }}
+                  >
+                    Edit Profile
+                  </Button>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Stats Cards */}
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={4}>
+              <Paper
                 sx={{
-                  borderRadius: '4px',
-                  backgroundColor: '#04BA8E05',
-                  border: '1px solid #04BA8E05',
+                  p: 3,
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
                 }}
               >
-                <CardContent sx={{ p: 4 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      mt: 2,
-                    }}
-                  >
-                    <Avatar
-                      src='https://via.placeholder.com/150'
-                      alt='User Avatar'
-                      sx={{ width: 110, height: 110 }}
-                    />
-
-                    <Button
-                      endIcon={<EditIcon />}
-                      onClick={() => {
-                        setEditForm({
-                          name: rawUser?.name || '',
-                          dob: rawUser?.dateOfBirth || '',
-                          email: rawUser?.email || '',
-                          gender: rawUser?.gender || '',
-                        });
-                        setEditOpen(true);
-                      }}
-                      sx={{
-                        textTransform: 'none',
-                        color: '#04BA8E',
-                        fontWeight: 'bold',
-                        fontSize: 16,
-                        cursor: 'pointer',
-                        ml: 2,
-                      }}
-                    >
-                      Profile
-                    </Button>
-                  </Box>
-
-                  {/* User Details */}
-                  <Box sx={{ mt: 2, textAlign: 'left' }}>
-                    {loadingUser ? (
-                      <>
-                        {[...Array(6)].map((_, index) => (
-                          <Box sx={{ pt: 2 }} key={index}>
-                            <Skeleton variant='text' width='60%' height={20} />
-                            <Skeleton variant='text' width='80%' height={20} sx={{ mt: 1 }} />
-                          </Box>
-                        ))}
-                      </>
-                    ) : (
-                      userData.map((item, index) => (
-                        <Box sx={{ pt: 2 }} key={item.label + index}>
-                          <Typography
-                            variant='body1'
-                            sx={{ fontSize: 16, fontWeight: 500 }}
-                            color='#6E6E6E'
-                          >
-                            {item.label}
-                          </Typography>
-                          <Typography
-                            variant='body1'
-                            color='#2B2A29'
-                            sx={{ fontSize: 16, fontWeight: 500, pt: 1 }}
-                          >
-                            {item.value}
-                          </Typography>
-                        </Box>
-                      ))
-                    )}
-                  </Box>
-
-                  {/* Lab Reports Link */}
-                  <Box
-                    onClick={() => {
-                      navigate('/patient/profile/labreport');
-                    }}
-                    sx={{
-                      mt: 3,
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: '#04BA8E',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      cursor: 'pointer',
-                    }}
-                  >
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: '#E8F5E9',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <CalendarMonthIcon sx={{ color: '#04BA8E', fontSize: 28 }} />
+                </Box>
+                <Box>
+                  <Typography variant='h5' fontWeight={700} color='#1A1A2E'>
+                    {appointments.length}
+                  </Typography>
+                  <Typography variant='body2' color='textSecondary'>
+                    Total Visits
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Paper
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: '#FFF3E0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <LocalHospitalIcon sx={{ color: '#FF9800', fontSize: 28 }} />
+                </Box>
+                <Box>
+                  <Typography variant='h5' fontWeight={700} color='#1A1A2E'>
+                    {upcomingAppts}
+                  </Typography>
+                  <Typography variant='body2' color='textSecondary'>
+                    Upcoming
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Paper
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  cursor: 'pointer',
+                  '&:hover': { bgcolor: '#F5F5F5' },
+                }}
+                onClick={() => navigate('/patient/profile/labreport')}
+              >
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: '#E3F2FD',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ScienceIcon sx={{ color: '#2196F3', fontSize: 28 }} />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant='h5' fontWeight={700} color='#1A1A2E'>
                     Lab Reports
-                    <ArrowForwardIosIcon
-                      sx={{
-                        marginLeft: '4px',
-                        fontWeight: 'bold',
-                        fontSize: 16,
-                      }}
-                    />
-                  </Box>
+                  </Typography>
+                  <Typography variant='body2' color='textSecondary'>
+                    View reports
+                  </Typography>
+                </Box>
+                <ArrowForwardIosIcon sx={{ fontSize: 14, color: '#2196F3' }} />
+              </Paper>
+            </Grid>
+          </Grid>
+
+          {/* Main Content */}
+          <Grid container spacing={3} alignItems='flex-start'>
+            {/* Personal Details */}
+            <Grid item xs={12} md={4}>
+              <Card
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant='h6' fontWeight={700} color='#1A1A2E' mb={2}>
+                    Personal Details
+                  </Typography>
+
+                  {userError ? (
+                    <Box sx={{ textAlign: 'center', py: 3 }}>
+                      <Typography color='textSecondary' variant='body2'>
+                        {userError}
+                      </Typography>
+                    </Box>
+                  ) : loadingUser ? (
+                    <>
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} variant='text' width='80%' height={32} sx={{ mb: 1 }} />
+                      ))}
+                    </>
+                  ) : (
+                    <Box>
+                      {userData.map((item, index) => (
+                        <Box
+                          key={item.label + index}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5,
+                            py: 1.5,
+                            borderBottom: index < userData.length - 1 ? '1px solid #F0F0F0' : 'none',
+                          }}
+                        >
+                          <Box sx={{ color: '#04BA8E', display: 'flex' }}>{item.icon}</Box>
+                          <Box>
+                            <Typography variant='caption' color='textSecondary'>
+                              {item.label}
+                            </Typography>
+                            <Typography variant='body2' fontWeight={600} color='#2B2A29'>
+                              {item.value}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={9}>
-              <Box
+
+            {/* Visit Information */}
+            <Grid item xs={12} md={8}>
+              <Card
                 sx={{
-                  flex: 1,
-                  backgroundColor: '#fff',
-                  borderRadius: '8px',
-                  py: '40px',
-                  px: '20px',
+                  borderRadius: 3,
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
                 }}
               >
                 <Accordion
-                  // key={idx}
+                  defaultExpanded
                   sx={{
-                    mb: 2,
-                    backgroundColor: '#04BA8E0A',
-                    borderRadius: 1,
+                    boxShadow: 'none',
+                    '&:before': { display: 'none' },
+                    borderRadius: 3,
                   }}
                 >
                   <AccordionSummary
                     expandIcon={<ExpandMoreIcon sx={{ color: '#04BA8E' }} />}
                     sx={{
-                      fontWeight: 'bold',
-                      color: '#444444',
-                      fontSize: 16,
+                      px: 3,
+                      py: 1,
+                      borderBottom: '1px solid #F0F0F0',
                     }}
                   >
-                    Visit Information
+                    <Typography variant='h6' fontWeight={700} color='#1A1A2E'>
+                      Visit History
+                    </Typography>
                   </AccordionSummary>
-                  <AccordionDetails>
-                    {loadingAppointments ? (
-                      <Grid container spacing={2} sx={{ py: 2, px: 2 }}>
-                        {[...Array(3)].map((_, index) => (
-                          <React.Fragment key={index}>
-                            <Grid item xs={3}>
-                              <Skeleton variant='text' width='100%' />
-                            </Grid>
-                            <Grid item xs={4}>
-                              <Skeleton variant='text' width='100%' />
-                            </Grid>
-                            <Grid item xs={4}>
-                              <Skeleton variant='text' width='100%' />
-                            </Grid>
-                            <Grid item xs={1}>
-                              <Skeleton variant='circular' width={24} height={24} />
-                            </Grid>
-                          </React.Fragment>
+                  <AccordionDetails sx={{ p: 0 }}>
+                    {appointmentError ? (
+                      <Box sx={{ p: 4, textAlign: 'center' }}>
+                        <Typography color='textSecondary' variant='body2'>
+                          {appointmentError}
+                        </Typography>
+                      </Box>
+                    ) : loadingAppointments ? (
+                      <Box sx={{ p: 3 }}>
+                        {[...Array(3)].map((_, i) => (
+                          <Skeleton key={i} variant='rectangular' height={48} sx={{ mb: 1, borderRadius: 1 }} />
                         ))}
-                      </Grid>
+                      </Box>
                     ) : appointments.length > 0 ? (
-                      <Grid
-                        container
-                        spacing={2}
-                        sx={{
-                          py: 2,
-                          px: 2,
-                          backgroundColor: '#fff',
-                          // textAlign: 'center', // 🔹 Center align all grid items
-                        }}
-                      >
-                        {/* {section.title === "Visit Information" ? ( */}
-                        <>
-                          <Grid item xs={3}>
-                            <Typography variant='subtitle2'>Date of Visit</Typography>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <Typography variant='subtitle2'>Reason for Visit</Typography>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <Typography variant='subtitle2'>Prescription</Typography>
-                          </Grid>
-                          <Grid item xs={1}>
-                            {/* <Typography variant='subtitle2'>Prescription</Typography> */}
-                          </Grid>
-                          {appointments.map((visit, index) => (
-                            <React.Fragment key={index}>
-                              <Grid item xs={3}>
-                                {formatAppointmentDate(visit.bookingDate)}
+                      <Box>
+                        {appointments.map((visit, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              px: 3,
+                              py: 2.5,
+                              borderBottom: index < appointments.length - 1 ? '1px solid #F0F0F0' : 'none',
+                              '&:hover': { bgcolor: '#FAFAFA' },
+                              transition: 'background 0.2s',
+                            }}
+                          >
+                            <Grid container alignItems='center' spacing={2}>
+                              <Grid item xs={12} sm={3}>
+                                <Typography variant='body2' fontWeight={600} color='#2B2A29'>
+                                  {formatAppointmentDate(visit.bookingDate)}
+                                </Typography>
                               </Grid>
-                              <Grid item xs={4}>
-                                {visit.reasonForVisit}
+                              <Grid item xs={12} sm={3}>
+                                <Typography variant='body2' color='#666'>
+                                  {visit.doctorName}
+                                </Typography>
+                                <Typography variant='caption' color='textSecondary'>
+                                  {visit.categoryDetailName}
+                                </Typography>
                               </Grid>
-                              <Grid item xs={4}>
+                              <Grid item xs={12} sm={3}>
                                 {visit.prescription ? (
-                                  <Box display='flex' gap={0.5}>
-                                    <Typography
-                                      color='primary'
-                                      sx={{
-                                        color: '#2B2A29',
-                                        fontWeight: 600,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 0.5,
-                                      }}
-                                    >
-                                      {visit.prescription}
-                                    </Typography>
-                                  </Box>
+                                  <Chip
+                                    label={visit.prescription.length > 30 ? visit.prescription.slice(0, 30) + '...' : visit.prescription}
+                                    size='small'
+                                    variant='outlined'
+                                    sx={{ borderColor: '#04BA8E', color: '#04BA8E', fontWeight: 500 }}
+                                  />
                                 ) : (
-                                  <Typography color='textSecondary'>No prescription</Typography>
+                                  <Typography variant='body2' color='textSecondary' fontStyle='italic'>
+                                    No prescription
+                                  </Typography>
                                 )}
                               </Grid>
-                              <Grid item xs={1}>
+                              <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
                                 <IconButton size='small' onClick={(e) => handleClick(e, index)}>
                                   <MoreVertIcon />
                                 </IconButton>
@@ -406,20 +515,13 @@ const Profile = () => {
                                   anchorEl={anchorEl[index]}
                                   open={Boolean(anchorEl[index])}
                                   onClose={() => handleClose(index)}
-                                  anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'right',
-                                  }}
-                                  transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                  }}
+                                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                 >
                                   {visit.prescription && (
                                     <MenuItem
                                       onClick={() => {
                                         setPrescriptionText(visit.prescription);
-
                                         setPrescriptionModal(true);
                                         handleClose(index);
                                       }}
@@ -429,12 +531,6 @@ const Profile = () => {
                                         fontWeight: 500,
                                         px: 2,
                                         py: 1,
-                                        borderRadius: '6px',
-                                        transition: 'all 0.2s ease-in-out',
-                                        '&:hover': {
-                                          backgroundColor: '#FFECEC',
-                                          color: '#D8000C',
-                                        },
                                       }}
                                     >
                                       View Prescription
@@ -442,24 +538,27 @@ const Profile = () => {
                                   )}
                                 </Menu>
                               </Grid>
-                            </React.Fragment>
-                          ))}
-                        </>
-                      </Grid>
+                            </Grid>
+                          </Box>
+                        ))}
+                      </Box>
                     ) : (
-                      <Typography variant='body2' color='textSecondary'>
-                        No records available.
-                      </Typography>
+                      <Box sx={{ p: 4, textAlign: 'center' }}>
+                        <CalendarMonthIcon sx={{ fontSize: 48, color: '#E0E0E0', mb: 1 }} />
+                        <Typography color='textSecondary'>No visit records found.</Typography>
+                      </Box>
                     )}
                   </AccordionDetails>
                 </Accordion>
-              </Box>
+              </Card>
             </Grid>
           </Grid>
         </Container>
       </Box>
 
       <Footer />
+
+      {/* Prescription Modal */}
       <Modal
         open={prescriptionModal}
         onClose={() => {
@@ -482,71 +581,32 @@ const Profile = () => {
             p: 4,
           }}
         >
-          {/* Header */}
           <Box display='flex' justifyContent='space-between' alignItems='center' mb={3}>
             <Typography variant='h6' fontWeight={600}>
-              View Prescription
+              Prescription
             </Typography>
             <IconButton onClick={() => setPrescriptionModal(false)}>
               <CloseIcon />
             </IconButton>
           </Box>
 
-          {/* Patient Information Card */}
-          {selectedAppointment && (
-            <Box
-              sx={{
-                bgcolor: '#F9FAFA',
-                borderRadius: 2,
-                p: 2,
-                mb: 3,
-              }}
-            >
-              <Typography variant='subtitle2' color='textSecondary' mb={1}>
-                Patient Information
-              </Typography>
-
-              <Grid container spacing={2} mt={1}>
-                <Grid item xs={12} sm={6} alignItems='center' gap={1}>
-                  <Typography fontWeight={600}>{selectedAppointment.patientName}</Typography>
-                  <Typography color='textSecondary' sx={{ mt: 2 }}>
-                    {selectedAppointment.reasonForVisit}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} display='flex' alignItems='center' gap={1}>
-                  <AccessTimeIcon fontSize='small' color='action' />
-                  <Typography variant='body2'>
-                    {formatAppointmentDate(selectedAppointment.date)} at{' '}
-                    {selectedAppointment.appointmentTime}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Box>
-          )}
-
-          {/* Prescription Input */}
-          <Box mb={3}>
-            <Typography variant='subtitle2' color='textSecondary' mb={1}>
-              Prescription
+          <TextField
+            variant='outlined'
+            fullWidth
+            multiline
+            rows={4}
+            value={prescription}
+            disabled
+            inputProps={{ maxLength: 240 }}
+          />
+          <Box textAlign='right' mt={0.5}>
+            <Typography variant='caption' color='textSecondary'>
+              {prescription.length}/240
             </Typography>
-            <TextField
-              placeholder='Add Prescription'
-              variant='outlined'
-              fullWidth
-              multiline
-              rows={4}
-              value={prescription}
-              disabled
-              inputProps={{ maxLength: 240 }}
-            />
-            <Box textAlign='right' mt={0.5}>
-              <Typography variant='caption' color='textSecondary'>
-                {prescription.length}/240
-              </Typography>
-            </Box>
           </Box>
         </Box>
       </Modal>
+
       <EditProfileDialog
         open={editOpen}
         onClose={() => setEditOpen(false)}
