@@ -21,9 +21,6 @@ const UNAUTHENTICATED_ROUTES = [
   '/unauth/login',
   '/unauth/login-verify-otp/3',
   '/api/authenticate/3/login',
-  '/create-order',
-  '/confirmPayment',
-  '/retry-payment',
 ];
 
 // **Attach Token Only for Protected Routes**
