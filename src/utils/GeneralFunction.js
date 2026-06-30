@@ -23,7 +23,9 @@ export const handleAuthTokens = (jwtToken) => {
     const base64payload = accessToken.split(".")[1];
     const decodedPayload = JSON.parse(atob(base64payload));
 
-    const roles = decodedPayload?.realm_access?.roles || [];
+    const realmRoles = decodedPayload?.realm_access?.roles || [];
+    const clientRoles = Object.values(decodedPayload?.resource_access || {}).flatMap(c => c.roles || []);
+    const allRoles = [...realmRoles, ...clientRoles];
     const allowedRoles = [
       "PATIENT",
       "ADMIN",
@@ -33,14 +35,14 @@ export const handleAuthTokens = (jwtToken) => {
     ];
 
     // Find first matching role (case-insensitive)
-    const userRole = roles.find((role) =>
+    const userRole = allRoles.find((role) =>
       allowedRoles.includes(role.toUpperCase())
     );
 
     if (userRole) {
       localStorage.setItem("user_role", userRole.toUpperCase());
     } else {
-      console.warn("No matching allowed role found in token payload:", roles);
+      console.warn("No matching allowed role found in token payload:", allRoles);
     }
   } catch (error) {
     console.error("Failed to process tokens", error);

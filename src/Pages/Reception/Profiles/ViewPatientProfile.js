@@ -6,7 +6,6 @@ import {
   Typography,
   Avatar,
   Grid,
-  Link,
   Accordion,
   TextField,
   AccordionSummary,
@@ -17,6 +16,9 @@ import {
   Modal,
   Menu,
   MenuItem,
+  Chip,
+  Skeleton,
+  Paper,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Spinner from '../../../Components/Backdrop/Backdrop';
@@ -43,23 +45,49 @@ import {
 } from "../../../Services/PatientServices";
 import ReceptionHeader from "../../../Components/Header/ReceptionHeader";
 import { updateCashPaymentStatusCall } from '../../../Redux/Modules/Reception/ReceptionThunk';
+import PersonIcon from '@mui/icons-material/Person';
+import WcIcon from '@mui/icons-material/Wc';
+import CakeIcon from '@mui/icons-material/Cake';
+import WorkIcon from '@mui/icons-material/Work';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import ScienceIcon from '@mui/icons-material/Science';
+import CancelConfirmationDialog from '../../../Components/Dialogs/CancelConfirmationDialog/CancelConfirmationDialog';
+import CancelSuccessDialog from '../../../Components/Dialogs/CancelSuccessDialog/CancelSuccessDialog';
+
 const ReceptionPatientProfile = () => {
   const { id } = useParams();
   const [userData, setuserData] = useState([]);
   const [appointments, setAppointments] = useState([]);
 
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
+  const [userError, setUserError] = useState('');
+  const [appointmentError, setAppointmentError] = useState('');
+
+  const [rawUser, setRawUser] = useState(null);
+
   useEffect(() => {
+    setLoadingUser(true);
+    setUserError('');
     getPatientProfileById(id).then((val) => {
       const userObject = val.data;
+      setRawUser(userObject);
       const userDetailsArray = [
-        { label: 'Name', value: userObject.name || 'N/A' },
-        { label: 'Gender', value: userObject.gender || 'N/A' },
-        { label: 'DOB', value: userObject.dateOfBirth || 'N/A' },
-        { label: 'Occupation', value: userObject.occupation || 'N/A' },
-        { label: 'Email', value: userObject.email || 'N/A' },
-        { label: 'Phone', value: userObject.mobileNo || 'N/A' },
+        { label: 'Name', value: userObject.name || 'N/A', icon: <PersonIcon fontSize='small' /> },
+        { label: 'Gender', value: userObject.gender || 'N/A', icon: <WcIcon fontSize='small' /> },
+        { label: 'DOB', value: userObject.dateOfBirth || 'N/A', icon: <CakeIcon fontSize='small' /> },
+        { label: 'Occupation', value: userObject.occupation || 'N/A', icon: <WorkIcon fontSize='small' /> },
+        { label: 'Email', value: userObject.email || 'N/A', icon: <EmailIcon fontSize='small' /> },
+        { label: 'Phone', value: userObject.mobileNo || 'N/A', icon: <PhoneIcon fontSize='small' /> },
       ];
       setuserData(userDetailsArray);
+      setLoadingUser(false);
+    }).catch(() => {
+      setUserError('Unable to load profile details.');
+      setLoadingUser(false);
     });
   }, [id]);
   const [anchorEl, setAnchorEl] = useState({});
@@ -71,7 +99,6 @@ const ReceptionPatientProfile = () => {
   const [bookingMode, setBookingMode] = useState('');
   const [prevApptDetails, setPrevApptDetails] = useState([]);
 
-  // const { selectedDoctorRec } = useSelector((state) => state.reception);
   const doctorList = useSelector((state) => state.home.doctorList || []);
   const [searchDoctor, setSearchDoctor] = useState('');
 
@@ -133,6 +160,8 @@ const ReceptionPatientProfile = () => {
 
   const fetchAppointments = async () => {
     try {
+      setAppointmentError('');
+      setLoadingAppointments(true);
       const allAppointments = [];
       let currentPage = 0;
       let totalPages = 1;
@@ -161,6 +190,9 @@ const ReceptionPatientProfile = () => {
       setAppointments(allAppointments);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setAppointmentError('Unable to load appointments.');
+    } finally {
+      setLoadingAppointments(false);
     }
   };
   useEffect(() => {
@@ -177,6 +209,10 @@ const ReceptionPatientProfile = () => {
   }, [returnMessage]);
 
   const { appConfig } = useSelector((state) => state.auth);
+  const [cancelConfirmationOpen, setCancelConfirmationOpen] = useState(false);
+  const [cancelSuccessOpen, setCancelSuccessOpen] = useState(false);
+  const [cancelApptData, setCancelApptData] = useState(null);
+
   const handleCancelAppointment = (appoinment) => {
     if (
       (appoinment.bookingStatus === 'B' || appoinment.bookingStatus === 'C') &&
@@ -188,7 +224,12 @@ const ReceptionPatientProfile = () => {
       setInfoModalData('Payment Status is Empty.\nContact Admin');
       return;
     }
+    setCancelApptData(appoinment);
+    setCancelConfirmationOpen(true);
+  };
 
+  const handleConfirmCancel = () => {
+    const appoinment = cancelApptData;
     const payload = {
       doctorId: appoinment.doctorId,
       regNo: appoinment.regNo,
@@ -201,19 +242,9 @@ const ReceptionPatientProfile = () => {
     };
 
     cancelAppointment({ payload, param: appoinment.appointmentId }).then(() => {
-      setInfoModal(true);
+      setCancelConfirmationOpen(false);
+      setCancelSuccessOpen(true);
       fetchAppointments();
-      setInfoModalData(
-        <>
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: 5 }}>
-            <CheckCircleIcon
-              color='success'
-              sx={{ width: 40, height: 40, mr: 2 }}
-            />
-            <Typography variant='h6'>Appointment Cancelled.</Typography>
-          </Box>
-        </>
-      );
     });
   };
 
@@ -221,8 +252,20 @@ const ReceptionPatientProfile = () => {
     X: 'CANCELLED',
     C: 'CONFIRMED',
     B: 'BOOKED',
-    // P: "PENDING",
   };
+
+  const statusColorMap = {
+    X: '#E53935',
+    C: '#04BA8E',
+    B: '#FF9800',
+  };
+
+  const statusBgMap = {
+    X: '#FFE5E5',
+    C: '#E6F7F3',
+    B: '#FFF3E0',
+  };
+
   const [infoModal, setInfoModal] = useState(false);
   const [infoModalData, setInfoModalData] = useState('');
   const updatePaymentStatus = async (appt) => {
@@ -253,6 +296,14 @@ const ReceptionPatientProfile = () => {
       );
     }
   };
+
+  const initials = rawUser?.name
+    ? rawUser.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U';
+
+  const upcomingCount = appointments.filter(
+    (a) => a.bookingStatus !== 'X' && new Date(a.bookingDate) >= new Date().setHours(0, 0, 0, 0)
+  ).length;
 
   return (
     <>
@@ -353,9 +404,7 @@ const ReceptionPatientProfile = () => {
           </Button>
         </Box>
       </Modal>
-      {/* Header */}
 
-      {/* Doctor Search */}
       <Modal
         open={openModal}
         onClose={() => {
@@ -385,8 +434,6 @@ const ReceptionPatientProfile = () => {
             fullWidth
             sx={{
               my: 2,
-              fontFamily: "'Albert Sans', sans-serif",
-              fontWeight: 500,
             }}
             value={searchDoctor}
             onChange={(e) => setSearchDoctor(e.target.value)}
@@ -404,8 +451,6 @@ const ReceptionPatientProfile = () => {
                       width: '25%',
                       left: 40,
                       bottom: 20,
-                      fontFamily: "'Albert Sans', sans-serif",
-                      fontWeight: 500,
                     }}
                     onClick={() => {
                       setOpenModal(false);
@@ -421,7 +466,7 @@ const ReceptionPatientProfile = () => {
             ))}
         </Box>
       </Modal>
-      {/* not common */}
+
       <Box>
         {openReceptionModal && (
           <ReceptionAppointmentModal
@@ -434,580 +479,502 @@ const ReceptionPatientProfile = () => {
           />
         )}
       </Box>
-      <Box
-        sx={{
-          backgroundColor: '#F9F9F9',
-          mb: 2,
-        }}
-      >
+
+      <Box sx={{ backgroundColor: '#F5F7FA', minHeight: '100vh', pb: 6 }}>
         <Container>
-          {/* common change navigate */}
-          <Box sx={{ display: 'flex', pt: 6 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', pt: 4, mb: 3 }}>
             <Button
-              onClick={() => {
-                navigate('/reception/dashboard');
-              }}
+              onClick={() => navigate('/reception/dashboard')}
+              sx={{ minWidth: 'auto', mr: 1, color: '#2B2A29' }}
             >
-              <ArrowBackIosIcon
-                sx={{
-                  marginLeft: '4px',
-                  color: '#2B2A29',
-                  fontSize: 24,
-                }}
-              />{' '}
-              <Typography
-                sx={{
-                  fontFamily: "'Albert Sans', sans-serif",
-                  fontWeight: 600, // SemiBold weight
-                  fontStyle: 'normal',
-                  fontSize: 24,
-                  lineHeight: '140%', // 140% line height
-                  letterSpacing: '-2%',
-                  textAlign: 'center',
-                  verticalAlign: 'middle',
-                  color: '#2B2A29',
-                }}
-              >
-                Patient Profile
-              </Typography>
+              <ArrowBackIosIcon sx={{ fontSize: 20 }} />
             </Button>
+            <Typography sx={{ fontWeight: 700, color: '#1A1A2E', fontSize: 26 }}>
+              Patient Profile
+            </Typography>
           </Box>
 
-          <Grid container spacing={2} sx={{ mt: 5 }}>
-            <Grid item xs={3}>
-              <Card
+          <Card
+            sx={{
+              borderRadius: 3,
+              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+              mb: 3,
+              background: 'linear-gradient(135deg, #04BA8E 0%, #029E76 100%)',
+              color: '#fff',
+            }}
+          >
+            <CardContent sx={{ p: 4 }}>
+              <Grid container alignItems='center' spacing={3}>
+                <Grid item xs={12} md={2} sx={{ textAlign: 'center' }}>
+                  <Avatar
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      fontSize: 36,
+                      fontWeight: 700,
+                      border: '3px solid rgba(255,255,255,0.5)',
+                      mx: 'auto',
+                    }}
+                  >
+                    {initials}
+                  </Avatar>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant='h5' fontWeight={700}>
+                    {rawUser?.name || 'Patient'}
+                  </Typography>
+                  <Typography sx={{ opacity: 0.85, mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <PhoneIcon sx={{ fontSize: 16 }} /> {rawUser?.mobileNo || 'N/A'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={4} sx={{ textAlign: { md: 'right' } }}>
+                  <Button
+                    variant='contained'
+                    onClick={onBookAppointment}
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(8px)',
+                      color: '#fff',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderRadius: 2,
+                      px: 3,
+                      py: 1,
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                    }}
+                  >
+                    Book An Appointment
+                  </Button>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={4}>
+              <Paper
                 sx={{
-                  borderRadius: '4px',
-                  backgroundColor: '#04BA8E05',
-                  border: '1px solid #04BA8E05',
+                  p: 3,
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
                 }}
               >
-                <CardContent sx={{ p: 4 }}>
-                  <Avatar
-                    key={1}
-                    src='https://via.placeholder.com/150'
-                    alt='Don Crumb'
-                    sx={{ width: 110, height: 110, mx: 'auto', mb: 2 }}
-                  />
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: '#E8F5E9',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <CalendarMonthIcon sx={{ color: '#04BA8E', fontSize: 28 }} />
+                </Box>
+                <Box>
+                  <Typography variant='h5' fontWeight={700} color='#1A1A2E'>
+                    {appointments.length}
+                  </Typography>
+                  <Typography variant='body2' color='textSecondary'>
+                    Total Visits
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Paper
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: '#FFF3E0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <LocalHospitalIcon sx={{ color: '#FF9800', fontSize: 28 }} />
+                </Box>
+                <Box>
+                  <Typography variant='h5' fontWeight={700} color='#1A1A2E'>
+                    {upcomingCount}
+                  </Typography>
+                  <Typography variant='body2' color='textSecondary'>
+                    Upcoming
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Paper
+                onClick={() => navigate(`/recepetion/lab/reports/${id}`)}
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  cursor: 'pointer',
+                  '&:hover': { bgcolor: '#F5F5F5' },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: '#E3F2FD',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ScienceIcon sx={{ color: '#2196F3', fontSize: 28 }} />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant='h5' fontWeight={700} color='#1A1A2E'>
+                    Lab Reports
+                  </Typography>
+                  <Typography variant='body2' color='textSecondary'>
+                    View reports
+                  </Typography>
+                </Box>
+                <ArrowForwardIosIcon sx={{ fontSize: 14, color: '#2196F3' }} />
+              </Paper>
+            </Grid>
+          </Grid>
 
-                  {/* User Details */}
-                  <Box sx={{ mt: 2, textAlign: 'left' }}>
-                    {userData.map(
-                      (item) =>
-                        item.value !== 'N/A' && (
-                          <Box sx={{ pt: 2 }} key={item.label}>
-                            <Typography
-                              // key={index}//index is causing issues with the key prop of not  being unique
-                              variant='body1'
-                              sx={{
-                                fontFamily: "'Albert Sans', sans-serif",
-                                fontWeight: 500, // Medium weight
-                                fontStyle: 'normal',
-                                fontSize: 16,
-                                lineHeight: '24px',
-                                letterSpacing: 0,
-                              }}
-                              color='#6E6E6E'
-                            >
+          <Grid container spacing={3} alignItems='flex-start'>
+            <Grid item xs={12} md={4}>
+              <Card
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant='h6' fontWeight={700} color='#1A1A2E' mb={2}>
+                    Personal Details
+                  </Typography>
+
+                  {userError ? (
+                    <Box sx={{ textAlign: 'center', py: 3 }}>
+                      <Typography color='textSecondary' variant='body2'>
+                        {userError}
+                      </Typography>
+                    </Box>
+                  ) : loadingUser ? (
+                    <>
+                      {[...Array(6)].map((_, i) => (
+                        <Skeleton key={i} variant='text' width='80%' height={32} sx={{ mb: 1 }} />
+                      ))}
+                    </>
+                  ) : (
+                    <Box>
+                      {userData.map((item, index) => (
+                        <Box
+                          key={item.label + index}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5,
+                            py: 1.5,
+                            borderBottom: index < userData.length - 1 ? '1px solid #F0F0F0' : 'none',
+                          }}
+                        >
+                          <Box sx={{ color: '#04BA8E', display: 'flex' }}>{item.icon}</Box>
+                          <Box>
+                            <Typography variant='caption' color='textSecondary'>
                               {item.label}
                             </Typography>
-                            <Typography
-                              // key={index}
-                              variant='body1'
-                              color='#2B2A29'
-                              sx={{
-                                fontFamily: "'Albert Sans', sans-serif",
-                                fontWeight: 500, // Medium
-                                fontStyle: 'normal',
-                                fontSize: '18px',
-                                lineHeight: '28px',
-                                letterSpacing: 0,
-                                pt: 1,
-                              }}
-                            >
+                            <Typography variant='body2' fontWeight={600} color='#2B2A29'>
                               {item.value}
                             </Typography>
                           </Box>
-                        )
-                    )}
-                  </Box>
-                  {/* common */}
-                  {/* Lab Reports Link */}
-                  <Box
-                    onClick={() => {
-                      navigate(`/recepetion/lab/reports/${id}`);
-                    }}
-                    sx={{
-                      mt: 3,
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: '#04BA8E',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Lab Reports
-                    <ArrowForwardIosIcon
-                      sx={{
-                        marginLeft: '4px',
-                        fontWeight: 'bold',
-                        fontSize: 16,
-                      }}
-                    />
-                  </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
-            {/* common */}
-            <Grid item xs={9}>
-              <Box
+
+            <Grid item xs={12} md={8}>
+              <Card
                 sx={{
-                  flex: 1,
-                  backgroundColor: '#fff',
-                  borderRadius: '8px',
-                  py: '40px',
-                  px: '24px',
-                  overflowX: 'auto',
+                  borderRadius: 3,
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
                 }}
               >
-                {/* not common extra in reception  */}
-                <Grid container spacing={2} sx={{ mt: 1, mb: 2 }}>
-                  <Grid item xs={6} display='flex' justifyContent='flex-start'>
-                    <Button
-                      sx={{
-                        backgroundColor: '#04BA8E',
-                        color: '#ffffff',
-                        minWidth: 180,
-                        width: 300,
-                        fontFamily: "'Albert Sans', sans-serif",
-                        fontWeight: 600,
-                        fontStyle: 'normal',
-                        fontSize: '18px',
-                        lineHeight: '28px',
-                        letterSpacing: 0,
-                        '&:hover': { backgroundColor: '#039b78' },
-                      }}
-                      onClick={() => {
-                        onBookAppointment();
-                      }}
-                    >
-                      Book An Appointment
-                    </Button>
-                  </Grid>
-                  <Grid item xs={6} display='flex' justifyContent='flex-end'>
-                    <Button
-                      sx={{
-                        backgroundColor: '#ffffff',
-                        color: '#04BA8E',
-                        minWidth: 180,
-                        width: 300,
-                        fontFamily: "'Albert Sans', sans-serif",
-                        fontWeight: 600,
-                        fontStyle: 'normal',
-                        fontSize: '18px',
-                        lineHeight: '28px',
-                        letterSpacing: 0,
-                        border: '1.5px solid #04BA8E',
-                        '&:hover': { backgroundColor: '#f2f2f2' },
-                      }}
-                      onClick={() => {
-                        navigate(`/recepetion/lab/reports/${id}`);
-                      }}
-                    >
-                      See Lab Reports
-                    </Button>
-                  </Grid>
-                </Grid>
-                {/* 
-                <Grid container spacing={2} sx={{ mt: 1, mb: 2 }}>
-                  <Grid item xs={6} display="flex" justifyContent="flex-start">
-                    <Button
-                      sx={{
-                        backgroundColor: "#04BA8E",
-                        color: "#ffffff",
-                        minWidth: 180,
-                        width: 300,
-                        fontWeight: "bold",
-                        "&:hover": { backgroundColor: "#039b78" },
-                      }}
-                      onClick={() => {
-                        onBookAppointment();
-                      }}
-                    >
-                      Book An Appointment
-                    </Button>
-                  </Grid>
-                  <Grid item xs={6} display="flex" justifyContent="flex-end">
-                    <Button
-                      sx={{
-                        backgroundColor: "#ffffff",
-                        color: "#04BA8E",
-                        minWidth: 180,
-                        width: 300,
-                        fontWeight: "bold",
-                        border: "1.5px solid #04BA8E",
-                        "&:hover": { backgroundColor: "#f2f2f2" },
-                      }}
-                      onClick={() => {
-                        navigate("/labReports");
-                      }}
-                    >
-                      See Lab Reports
-                    </Button>
-                  </Grid>
-                </Grid> */}
-
-                {/* common l 254 */}
-                {/* Visit Information in Accordion */}
-                {[
-                  {
-                    title: 'Visit Information',
-                    data: [
-                      {
-                        date: '21 Nov',
-                        reason: 'Cold',
-                        prescription: '21doncrumb.pdf',
-                      },
-                      {
-                        date: '19 Nov',
-                        reason: 'Fever',
-                        prescription: '19doncrumb.pdf',
-                      },
-                      {
-                        date: '17 Nov',
-                        reason: 'Fever',
-                        prescription: '17doncrumb.pdf',
-                      },
-                    ],
-                  },
-                ].map((section, idx) => (
-                  <Accordion
-                    key={idx}
+                <Accordion
+                  defaultExpanded
+                  sx={{
+                    boxShadow: 'none',
+                    '&:before': { display: 'none' },
+                    borderRadius: 3,
+                  }}
+                >
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon sx={{ color: '#04BA8E' }} />}
                     sx={{
-                      mb: 2,
-                      backgroundColor: '#04BA8E0A',
-                      borderRadius: 1,
+                      px: 3,
+                      py: 1,
+                      borderBottom: '1px solid #F0F0F0',
                     }}
                   >
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon sx={{ color: '#04BA8E' }} />}
-                      sx={{
-                        fontFamily: "'Albert Sans', sans-serif",
-                        fontWeight: 600, // SemiBold
-                        fontStyle: 'normal',
-                        fontSize: '14px',
-                        lineHeight: '20px',
-                        letterSpacing: 0,
-                        color: '#444444',
-                      }}
-                    >
-                      {section.title}
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      {section.data.length > 0 ? (
-                        <Grid
-                          container
-                          spacing={1}
-                          backgroundColor='#fff'
-                          sx={{ py: 2, px: 2 }}
-                        >
-                          {section.title === 'Visit Information' ? (
-                            <>
-                              <Grid item xs={4} textAlign={'center'}>
-                                <Typography variant='subtitle2'>
-                                  Date of Visit
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={4} textAlign={'center'}>
-                                <Typography variant='subtitle2'>
-                                  Reason for Visit
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={4} textAlign={'center'}>
-                                <Typography variant='subtitle2'>
-                                  Prescription
-                                </Typography>
-                              </Grid>
-                              {section.data.map((visit, index) => (
-                                <React.Fragment key={index}>
-                                  <Grid item xs={4} textAlign={'center'}>
-                                    {visit.date}
-                                  </Grid>
-                                  <Grid item xs={4} textAlign={'center'}>
-                                    {visit.reason}
-                                  </Grid>
-                                  <Grid item xs={4} textAlign={'center'}>
-                                    <Link href='#' color='primary'>
-                                      {visit.prescription}
-                                    </Link>
-                                  </Grid>
-                                </React.Fragment>
-                              ))}
-                            </>
-                          ) : (
-                            <>
-                              <Grid item xs={4} textAlign={'center'}>
-                                <Typography variant='subtitle2'>
-                                  Condition
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={4} textAlign={'center'}>
-                                <Typography variant='subtitle2'>
-                                  Date
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={4} textAlign={'center'}>
-                                <Typography variant='subtitle2'>
-                                  Treatment
-                                </Typography>
-                              </Grid>
-                              {section.data.map((record, index) => (
-                                <React.Fragment key={index}>
-                                  <Grid item xs={4} textAlign={'center'}>
-                                    {record.condition}
-                                  </Grid>
-                                  <Grid item xs={4} textAlign={'center'}>
-                                    {record.date}
-                                  </Grid>
-                                  <Grid item xs={4} textAlign={'center'}>
-                                    {record.treatment}
-                                  </Grid>
-                                </React.Fragment>
-                              ))}
-                            </>
-                          )}
-                        </Grid>
-                      ) : (
-                        <Typography variant='body2' color='textSecondary'>
-                          No records available.
-                        </Typography>
-                      )}
-                    </AccordionDetails>
-                  </Accordion>
-                ))}
-                <Grid item xs={12}>
-                  <Accordion>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon sx={{ color: '#04BA8E' }} />}
-                      sx={{
-                        fontFamily: "'Albert Sans', sans-serif",
-                        fontWeight: 600, // SemiBold
-                        fontStyle: 'normal',
-                        fontSize: '14px',
-                        lineHeight: '20px',
-                        letterSpacing: 0,
-                        color: '#444444',
-                      }}
-                    >
+                    <Typography variant='h6' fontWeight={700} color='#1A1A2E'>
                       All Appointments
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      {appointments.length > 0 ? (
-                        <Grid container spacing={1} backgroundColor='#fff' sx={{ py: 2, px: 2 }}>
-                          {/* Header Row */}
-                          <Grid item xs={2} textAlign='center'>
-                            <Typography variant='subtitle2'>Date & Time</Typography>
-                          </Grid>
-                          <Grid item xs={2} textAlign='center'>
-                            <Typography variant='subtitle2'>Doctor</Typography>
-                          </Grid>
-                          <Grid item xs={3} textAlign='center'>
-                            <Typography variant='subtitle2'>Specialty</Typography>
-                          </Grid>
-                          <Grid item xs={2} textAlign='center'>
-                            <Typography variant='subtitle2'>
-                              PaymentStatus
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={2} textAlign='center'>
-                            <Typography variant='subtitle2'>Status</Typography>
-                          </Grid>
-                          <Grid item xs={1} textAlign='center'>
-                            <Typography variant='subtitle2'>Action</Typography>
-                          </Grid>
-
-                          {/* Appointment Rows */}
-                          {appointments.map((appt, index) => (
-                            <React.Fragment key={`appt-${index}`}>
-                              <Grid item xs={2} textAlign='center'>
-                                {appt.date}
-                              </Grid>
-                              <Grid item xs={2} textAlign='center'>
-                                {appt.doctor}
-                              </Grid>
-                              <Grid item xs={3} textAlign='center'>
-                                {appt.specialty}
-                              </Grid>
-                              <Grid item xs={2} textAlign='center'>
-                                {appt.paymentStatus}
-                              </Grid>
-                              <Grid item xs={2} textAlign='center'>
-                                {statusMap[appt.bookingStatus]}
-                              </Grid>
-                              <Grid item xs={1} textAlign='center'>
-                                <IconButton size='small' onClick={(e) => handleClick(e, index)}>
-                                  <MoreVertIcon />
-                                </IconButton>
-                                <Menu
-                                  anchorEl={anchorEl[index]}
-                                  open={Boolean(anchorEl[index])}
-                                  onClose={() => handleClose(index)}
-                                  anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'right',
-                                  }}
-                                  transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                  }}
-                                >
-                                  {/* {appt.bookingStatus !== 'C' &&
-                                    appt.bookingStatus !== 'X' &&
-                                    appt.paymentMethod === 'Online Payment' &&
-                                    appt.paymentStatus === 'Pending' && (
-                                      <MenuItem
-                                        onClick={() => {
-                                          setInfoModal(true);
-                                          setInfoModalData(
-                                            'Mode of Payment is Online.\nPay through Patient Account.'
-                                          );
-                                          handleClose(index);
-                                        }}
-                                        sx={{
-                                          color: '#04BA8E',
-                                          fontSize: '14px',
-                                          fontWeight: 500,
-                                          px: 2,
-                                          py: 1,
-                                          borderRadius: '6px',
-                                          transition: 'all 0.2s ease-in-out',
-                                          '&:hover': {
-                                            backgroundColor: '#02bd8e58',
-                                            color: '#2c6053ff',
-                                          },
-                                        }}
-                                      >
-                                        Online Payment
-                                      </MenuItem>
-                                    )} */}
-                                  {appt.bookingStatus !== 'C' &&
-                                    appt.bookingStatus !== 'X' &&
-                                    appt.paymentMethod !== 'Online Payment' && (
-                                      <MenuItem
-                                        onClick={() => {
-                                          updatePaymentStatus(appt);
-                                          handleClose(index);
-                                        }}
-                                        sx={{
-                                          color: '#04BA8E',
-                                          fontSize: '14px',
-                                          fontWeight: 500,
-                                          px: 2,
-                                          py: 1,
-                                          borderRadius: '6px',
-                                          transition: 'all 0.2s ease-in-out',
-                                          '&:hover': {
-                                            backgroundColor: '#02bd8e58',
-                                            color: '#2c6053ff',
-                                          },
-                                        }}
-                                      >
-                                        Update Payment
-                                      </MenuItem>
-                                    )}
-                                  {appt.bookingStatus !== 'X' &&
-                                  new Date(appt.bookingDate) >=
-                                    new Date().setHours(0, 0, 0, 0) ? (
-                                    <MenuItem
-                                      onClick={() => {
-                                        setPrevApptDetails(appt);
-                                        setBookingMode('modify');
-                                        setOpenModal(false);
-                                        setOpenReceptionModal(true);
-                                        handleClose(index);
-                                      }}
-                                      sx={{
-                                        color: '#04BA8E',
-                                        fontSize: '14px',
-                                        fontWeight: 500,
-                                        px: 2,
-                                        py: 1,
-                                        borderRadius: '6px',
-                                        transition: 'all 0.2s ease-in-out',
-                                        '&:hover': {
-                                          backgroundColor: '#02bd8e58',
-                                          color: '#2c6053ff',
-                                        },
-                                      }}
-                                    >
-                                      Reschedule
-                                    </MenuItem>
-                                  ) : (
-                                    <MenuItem
-                                      sx={{
-                                        color: '#04BA8E',
-                                        fontSize: '14px',
-                                        fontWeight: 500,
-                                        px: 2,
-                                        py: 1,
-                                        borderRadius: '6px',
-                                        transition: 'all 0.2s ease-in-out',
-                                        '&:hover': {
-                                          backgroundColor: '#02bd8e58',
-                                          color: '#2c6053ff',
-                                        },
-                                      }}
-                                    >
-                                      No Action
-                                    </MenuItem>
-                                  )}
-                                  {appt.bookingStatus !== 'X' &&
-                                    appt.paymentStatus !== 'Refunded' &&
-                                    new Date(appt.bookingDate) >=
-                                      new Date().setHours(0, 0, 0, 0) && (
-                                      <MenuItem
-                                        onClick={() => {
-                                          handleCancelAppointment(appt);
-                                          handleClose(index);
-                                        }}
-                                        sx={{
-                                          color: '#FF2424',
-                                          fontSize: '14px',
-                                          fontWeight: 500,
-                                          px: 2,
-                                          py: 1,
-                                          borderRadius: '6px',
-                                          transition: 'all 0.2s ease-in-out',
-                                          '&:hover': {
-                                            backgroundColor: '#FFECEC',
-                                            color: '#D8000C',
-                                          },
-                                        }}
-                                      >
-                                        Cancel
-                                      </MenuItem>
-                                    )}
-                                </Menu>
-                              </Grid>
-                            </React.Fragment>
-                          ))}
-                        </Grid>
-                      ) : (
-                        <Typography variant='body2' color='textSecondary'>
-                          No upcoming appointments.
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ p: 0 }}>
+                    {appointmentError ? (
+                      <Box sx={{ p: 4, textAlign: 'center' }}>
+                        <Typography color='textSecondary' variant='body2'>
+                          {appointmentError}
                         </Typography>
-                      )}
-                    </AccordionDetails>
-                  </Accordion>
-                </Grid>
-              </Box>
+                      </Box>
+                    ) : loadingAppointments ? (
+                      <Box sx={{ p: 3 }}>
+                        {[...Array(3)].map((_, i) => (
+                          <Skeleton key={i} variant='rectangular' height={48} sx={{ mb: 1, borderRadius: 1 }} />
+                        ))}
+                      </Box>
+                    ) : appointments.length > 0 ? (
+                      <Box>
+                        <Grid container sx={{ px: 3, py: 2, bgcolor: '#FAFAFA', borderBottom: '1px solid #F0F0F0' }}>
+                          <Grid item xs={2}>
+                            <Typography variant='caption' fontWeight={700} color='#666'>Date & Time</Typography>
+                          </Grid>
+                          <Grid item xs={2}>
+                            <Typography variant='caption' fontWeight={700} color='#666'>Doctor</Typography>
+                          </Grid>
+                          <Grid item xs={2}>
+                            <Typography variant='caption' fontWeight={700} color='#666'>Specialty</Typography>
+                          </Grid>
+                          <Grid item xs={2}>
+                            <Typography variant='caption' fontWeight={700} color='#666'>Payment</Typography>
+                          </Grid>
+                          <Grid item xs={2}>
+                            <Typography variant='caption' fontWeight={700} color='#666'>Status</Typography>
+                          </Grid>
+                          <Grid item xs={2} textAlign='center'>
+                            <Typography variant='caption' fontWeight={700} color='#666'>Action</Typography>
+                          </Grid>
+                        </Grid>
+
+                        {appointments.map((appt, index) => {
+                          const statusVal = statusMap[appt.bookingStatus] || appt.bookingStatus;
+                          const statusColor = statusColorMap[appt.bookingStatus] || '#666';
+                          const statusBg = statusBgMap[appt.bookingStatus] || '#F5F5F5';
+                          const isCancelled = appt.bookingStatus === 'X';
+                          return (
+                            <Box
+                              key={`appt-${index}`}
+                              sx={{
+                                px: 3,
+                                py: 2,
+                                borderBottom: index < appointments.length - 1 ? '1px solid #F0F0F0' : 'none',
+                                '&:hover': { bgcolor: '#FAFAFA' },
+                                transition: 'background 0.2s',
+                                opacity: isCancelled ? 0.6 : 1,
+                              }}
+                            >
+                              <Grid container alignItems='center'>
+                                <Grid item xs={2}>
+                                  <Typography variant='body2' fontWeight={600} color='#2B2A29'>
+                                    {appt.date}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={2}>
+                                  <Typography variant='body2' color='#333' fontWeight={500}>
+                                    {appt.doctor}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={2}>
+                                  <Typography variant='body2' color='#666'>
+                                    {appt.specialty}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={2}>
+                                  <Chip
+                                    label={appt.paymentStatus || 'N/A'}
+                                    size='small'
+                                    variant='outlined'
+                                    sx={{
+                                      borderColor: appt.paymentStatus === 'CASH_PAID' ? '#04BA8E' : '#E0E0E0',
+                                      color: appt.paymentStatus === 'CASH_PAID' ? '#04BA8E' : '#999',
+                                      fontWeight: 500,
+                                      fontSize: 11,
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item xs={2}>
+                                  <Chip
+                                    label={statusVal}
+                                    size='small'
+                                    sx={{
+                                      bgcolor: statusBg,
+                                      color: statusColor,
+                                      fontWeight: 600,
+                                      fontSize: 11,
+                                      height: 24,
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item xs={2} textAlign='center'>
+                                  {!isCancelled && (
+                                    <IconButton size='small' onClick={(e) => handleClick(e, index)}>
+                                      <MoreVertIcon />
+                                    </IconButton>
+                                  )}
+                                  <Menu
+                                    anchorEl={anchorEl[index]}
+                                    open={Boolean(anchorEl[index])}
+                                    onClose={() => handleClose(index)}
+                                    anchorOrigin={{
+                                      vertical: 'bottom',
+                                      horizontal: 'right',
+                                    }}
+                                    transformOrigin={{
+                                      vertical: 'top',
+                                      horizontal: 'right',
+                                    }}
+                                    PaperProps={{
+                                      sx: {
+                                        borderRadius: 2,
+                                        boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+                                        p: 1,
+                                        minWidth: 200,
+                                      },
+                                    }}
+                                  >
+                                    {appt.bookingStatus !== 'C' &&
+                                      appt.bookingStatus !== 'X' &&
+                                      appt.paymentMethod !== 'Online Payment' && (
+                                        <MenuItem
+                                          onClick={() => {
+                                            updatePaymentStatus(appt);
+                                            handleClose(index);
+                                          }}
+                                          sx={{
+                                            color: '#04BA8E',
+                                            fontSize: '14px',
+                                            fontWeight: 500,
+                                            px: 2,
+                                            py: 1,
+                                            borderRadius: '6px',
+                                            '&:hover': {
+                                              backgroundColor: '#02bd8e58',
+                                              color: '#2c6053ff',
+                                            },
+                                          }}
+                                        >
+                                          Update Payment
+                                        </MenuItem>
+                                      )}
+                                    {appt.bookingStatus !== 'X' &&
+                                    new Date(appt.bookingDate) >=
+                                      new Date().setHours(0, 0, 0, 0) ? (
+                                      <MenuItem
+                                        onClick={() => {
+                                          setPrevApptDetails(appt);
+                                          setBookingMode('modify');
+                                          setOpenModal(false);
+                                          setOpenReceptionModal(true);
+                                          handleClose(index);
+                                        }}
+                                        sx={{
+                                          color: '#04BA8E',
+                                          fontSize: '14px',
+                                          fontWeight: 500,
+                                          px: 2,
+                                          py: 1,
+                                          borderRadius: '6px',
+                                          '&:hover': {
+                                            backgroundColor: '#02bd8e58',
+                                            color: '#2c6053ff',
+                                          },
+                                        }}
+                                      >
+                                        Reschedule
+                                      </MenuItem>
+                                    ) : null}
+                                    {appt.bookingStatus !== 'X' &&
+                                      appt.paymentStatus !== 'Refunded' &&
+                                      new Date(appt.bookingDate) >=
+                                        new Date().setHours(0, 0, 0, 0) && (
+                                        <MenuItem
+                                          onClick={() => {
+                                            handleCancelAppointment(appt);
+                                            handleClose(index);
+                                          }}
+                                          sx={{
+                                            color: '#FF2424',
+                                            fontSize: '14px',
+                                            fontWeight: 500,
+                                            px: 2,
+                                            py: 1,
+                                            borderRadius: '6px',
+                                            '&:hover': {
+                                              backgroundColor: '#FFECEC',
+                                              color: '#D8000C',
+                                            },
+                                          }}
+                                        >
+                                          Cancel
+                                        </MenuItem>
+                                      )}
+                                  </Menu>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    ) : (
+                      <Box sx={{ p: 4, textAlign: 'center' }}>
+                        <CalendarMonthIcon sx={{ fontSize: 48, color: '#E0E0E0', mb: 1 }} />
+                        <Typography color='textSecondary'>No appointments found.</Typography>
+                      </Box>
+                    )}
+                  </AccordionDetails>
+                </Accordion>
+              </Card>
             </Grid>
           </Grid>
         </Container>
       </Box>
 
-      {/* <Footer /> */}
+      <CancelConfirmationDialog
+        open={cancelConfirmationOpen}
+        handleClose={() => setCancelConfirmationOpen(false)}
+        cancelAppointmentData={cancelApptData}
+        handleConfirm={handleConfirmCancel}
+      />
+
+      <CancelSuccessDialog
+        open={cancelSuccessOpen}
+        handleClose={() => {
+          setCancelSuccessOpen(false);
+          fetchAppointments();
+        }}
+      />
     </>
   );
 };

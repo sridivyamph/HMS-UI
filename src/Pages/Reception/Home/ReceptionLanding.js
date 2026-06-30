@@ -259,8 +259,11 @@ const ReceptionLanding = () => {
             })
           ).unwrap();
         }
-        setAppointmentList(response.content);
-        setAppointmentListCache(response.content);
+        const activeAppointments = response.content.filter(
+          (row) => row.bookingStatus !== 'X' && row.status !== 'CANCELLED'
+        );
+        setAppointmentList(activeAppointments);
+        setAppointmentListCache(activeAppointments);
         setTotalCount(response.page.totalElements);
         setSpinnerLoad(false);
       } catch (error) {

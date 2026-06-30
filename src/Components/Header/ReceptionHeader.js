@@ -26,7 +26,7 @@ const ReceptionHeader = () => {
   const { appConfig, isConfigLoaded } = useSelector((state) => state.auth);
   const { userId, receptionData } = useSelector((state) => state.reception);
 
-  const param = appConfig?.hospitalId;
+  const param = appConfig?.hospitalId || 3;
 
   const TechieName = receptionData?.username;
 
