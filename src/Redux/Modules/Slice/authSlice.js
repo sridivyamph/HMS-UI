@@ -31,7 +31,10 @@ export const AuthSlice = createSlice({
         state.appConfig = action.payload;
         state.isConfigLoaded = true;
       })
-      .addCase(fetchConfigThunk.rejected, (state, action) => {});
+      .addCase(fetchConfigThunk.rejected, (state, action) => {
+        state.isConfigLoaded = true;
+        state.appConfig = { hospitalId: 3 };
+      });
   },
 });
 

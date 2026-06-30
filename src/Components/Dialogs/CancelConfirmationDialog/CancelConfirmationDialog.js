@@ -11,6 +11,7 @@ import {
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 const CancelConfirmationDialog = ({ open, handleClose, cancelAppointmentData, handleConfirm }) => {
+  if (!cancelAppointmentData) return null;
   console.log(cancelAppointmentData, 'Canel');
   const { doctorName, date } = cancelAppointmentData;
 

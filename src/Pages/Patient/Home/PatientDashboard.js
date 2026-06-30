@@ -248,7 +248,8 @@ const PatientDashboard = () => {
       patientId: appoinment.regNo,
       date: appoinment.bookingDate,
       time: appoinment.timeFrom,
-      hospitalId: appConfig.hospitalId,
+      // hospitalId: appConfig.hospitalId,
+      hospitalId:3,
       status: 'CANCELLED',
       bookingId: appoinment.appointmentId,
     };

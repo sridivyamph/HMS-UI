@@ -90,10 +90,7 @@ const PatientGuestVersion = () => {
 
   useEffect(() => {
     if (isUserLoggedIn) {
-      const timer = setTimeout(() => {
-        navigate('/patient/dashboard');
-      }, 300);
-      return () => clearTimeout(timer);
+      navigate('/patient/dashboard', { replace: true });
     }
   }, [isUserLoggedIn]);
 

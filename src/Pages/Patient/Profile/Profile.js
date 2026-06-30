@@ -30,7 +30,9 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Footer from '../../../Components/Footer/footer';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { getPatientProfileById, getUserAppointment } from '../../../Services/PatientServices';
+import { getPatientProfileById, getUserAppointment, cancelAppointment } from '../../../Services/PatientServices';
+import CancelConfirmationDialog from '../../../Components/Dialogs/CancelConfirmationDialog/CancelConfirmationDialog';
+import CancelSuccessDialog from '../../../Components/Dialogs/CancelSuccessDialog/CancelSuccessDialog';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -61,6 +63,9 @@ const Profile = () => {
   });
   const [userError, setUserError] = useState('');
   const [appointmentError, setAppointmentError] = useState('');
+  const [cancelConfirmationOpen, setCancelConfirmationOpen] = useState(false);
+  const [cancelSuccessOpen, setCancelSuccessOpen] = useState(false);
+  const [cancelAppointmentData, setCancelAppointmentData] = useState(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -164,6 +169,32 @@ const Profile = () => {
       ]);
     } catch {
       setUserError('Failed to update profile. Please try again.');
+    }
+  };
+
+  const handleCancelAppointment = (appt) => {
+    setCancelAppointmentData(appt);
+    setCancelConfirmationOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    const appt = cancelAppointmentData;
+    const payload = {
+      doctorId: appt.doctorId,
+      regNo: localStorage.getItem('regNo'),
+      patientId: localStorage.getItem('regNo'),
+      date: appt.bookingDate,
+      time: appt.timeFrom,
+      hospitalId: 3,
+      status: 'CANCELLED',
+      bookingId: appt.appointmentId,
+    };
+    try {
+      await cancelAppointment({ payload, param: appt.appointmentId });
+      setCancelConfirmationOpen(false);
+      setCancelSuccessOpen(true);
+    } catch {
+      setCancelConfirmationOpen(false);
     }
   };
 
@@ -484,6 +515,20 @@ const Profile = () => {
                                 <Typography variant='body2' fontWeight={600} color='#2B2A29'>
                                   {formatAppointmentDate(visit.bookingDate)}
                                 </Typography>
+                                {(visit.bookingStatus === 'X' || visit.status === 'CANCELLED') && (
+                                  <Chip
+                                    label='Cancelled'
+                                    size='small'
+                                    sx={{
+                                      mt: 0.5,
+                                      bgcolor: '#FFE5E5',
+                                      color: '#E53935',
+                                      fontWeight: 600,
+                                      fontSize: 11,
+                                      height: 22,
+                                    }}
+                                  />
+                                )}
                               </Grid>
                               <Grid item xs={12} sm={3}>
                                 <Typography variant='body2' color='#666'>
@@ -508,9 +553,11 @@ const Profile = () => {
                                 )}
                               </Grid>
                               <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
-                                <IconButton size='small' onClick={(e) => handleClick(e, index)}>
-                                  <MoreVertIcon />
-                                </IconButton>
+                                {visit.bookingStatus !== 'X' && visit.status !== 'CANCELLED' && (
+                                  <IconButton size='small' onClick={(e) => handleClick(e, index)}>
+                                    <MoreVertIcon />
+                                  </IconButton>
+                                )}
                                 <Menu
                                   anchorEl={anchorEl[index]}
                                   open={Boolean(anchorEl[index])}
@@ -518,6 +565,21 @@ const Profile = () => {
                                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                 >
+                                  <MenuItem
+                                    onClick={() => {
+                                      handleCancelAppointment(visit);
+                                      handleClose(index);
+                                    }}
+                                    sx={{
+                                      color: '#E53935',
+                                      fontSize: '14px',
+                                      fontWeight: 500,
+                                      px: 2,
+                                      py: 1,
+                                    }}
+                                  >
+                                    Cancel Appointment
+                                  </MenuItem>
                                   {visit.prescription && (
                                     <MenuItem
                                       onClick={() => {
@@ -612,6 +674,21 @@ const Profile = () => {
         onClose={() => setEditOpen(false)}
         initialData={editForm}
         onSubmit={handleEditSubmit}
+      />
+
+      <CancelConfirmationDialog
+        open={cancelConfirmationOpen}
+        handleClose={() => setCancelConfirmationOpen(false)}
+        cancelAppointmentData={cancelAppointmentData}
+        handleConfirm={handleConfirmCancel}
+      />
+
+      <CancelSuccessDialog
+        open={cancelSuccessOpen}
+        handleClose={() => {
+          setCancelSuccessOpen(false);
+          fetchAppointments();
+        }}
       />
     </>
   );
