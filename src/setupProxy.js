@@ -1,8 +1,8 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const proxy = createProxyMiddleware({
-  // target: 'https://gateway.zautomate.in',
-  target: 'http://localhost:3000',
+  target: 'https://gateway.zautomate.in',
+  // target: 'http://localhost:3000',
   changeOrigin: true,
   secure: false,
   onProxyReq: (proxyReq, req) => {
