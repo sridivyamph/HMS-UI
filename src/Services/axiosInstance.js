@@ -9,11 +9,20 @@ const api = axios.create({
   },
 });
 
-// Retrieve tokens from local storage
+let isRefreshing = false;
+let failedQueue = [];
 
-let refreshToken = localStorage.getItem('refresh_token');
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
-// Define API routes that DON'T need authentication
 const UNAUTHENTICATED_ROUTES = [
   '/api/doctor/all',
   '/unauth/register',
@@ -23,7 +32,8 @@ const UNAUTHENTICATED_ROUTES = [
   '/api/authenticate/3/login',
 ];
 
-// **Attach Token Only for Protected Routes**
+let loggingOut = false;
+
 api.interceptors.request.use(
   (config) => {
     const isUnprotectedRoute = UNAUTHENTICATED_ROUTES.some((route) => config.url.includes(route));
@@ -36,34 +46,44 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-// Handle Token Expiry & Refresh**
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Check: is this request protected?
     const isUnprotectedRoute = UNAUTHENTICATED_ROUTES.some((route) =>
       originalRequest.url.includes(route)
     );
 
-    // ✅ Only try refresh if:
-    // 1. Response is 401
-    // 2. The request was protected
-    // 3. Not already retried
     if (error.response?.status === 401 && !isUnprotectedRoute && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      try {
-        const latestRefreshToken = localStorage.getItem('refresh_token');
+      if (loggingOut) {
+        return Promise.reject(error);
+      }
 
-        if (!latestRefreshToken) {
-          console.error('No refresh token found, logging out...');
-          logoutUser();
+      const latestRefreshToken = localStorage.getItem('refresh_token');
+      if (!latestRefreshToken) {
+        logoutUser();
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        if (loggingOut) {
           return Promise.reject(error);
         }
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers['Authorization'] = `Bearer ${token}`;
+          return axios(originalRequest);
+        }).catch((err) => Promise.reject(err));
+      }
 
+      isRefreshing = true;
+
+      try {
         const response = await axios.post(`${BASE_URL}/unauth/refresh`, {
           refreshToken: latestRefreshToken,
         });
@@ -78,45 +98,45 @@ api.interceptors.response.use(
         localStorage.setItem('access_token', newAccessToken);
         localStorage.setItem('refresh_token', newRefreshToken);
 
-        // Retry original
+        processQueue(null, newAccessToken);
+
         originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
         return axios(originalRequest);
       } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
-        logoutUser();
+        processQueue(refreshError, null);
+        if (!loggingOut) {
+          logoutUser();
+        }
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
-    // For unprotected routes or other 401s → pass error back
     return Promise.reject(error);
   }
 );
 
 const logoutUser = () => {
+  if (loggingOut) return;
+  loggingOut = true;
   console.log('Logging out due to inactivity');
+  const userType = localStorage.getItem('user_role');
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
-  const userType = localStorage.getItem('user_role');
-  switch (userType) {
-    case 'ADMIN':
-      window.location.href = '/#/admin/login';
-      break;
-    case 'PATIENT':
-      window.location.href = '/#/patient/login';
-      break;
-    case 'DOCTOR':
-      window.location.href = '/#/doctor/login';
-      break;
-    case 'RECEPTIONIST':
-      window.location.href = '/#/reception/login';
-      break;
-    case 'LAB-TECHNICIAN':
-      window.location.href = '/#/lab/login';
-      break;
-    default:
-      window.location.href = '/#'; // fallback
-  }
+  localStorage.removeItem('user_role');
+  localStorage.removeItem('regNo');
+  localStorage.removeItem('isDoctorLogin');
+  localStorage.removeItem('isReceptionLogin');
+  const loginPaths = {
+    ADMIN: '/admin/login',
+    PATIENT: '/patient/login',
+    DOCTOR: '/doctor/login',
+    RECEPTIONIST: '/reception/login',
+    'LAB-TECHNICIAN': '/lab/login',
+  };
+  const base = window.location.href.split('#')[0];
+  window.location.href = base + '#' + (loginPaths[userType] || '/');
 };
 
 export default api;

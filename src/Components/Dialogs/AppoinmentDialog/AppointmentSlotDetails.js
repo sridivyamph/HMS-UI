@@ -142,7 +142,7 @@ function AppointmentSlotDetails({
 
         setrazorPayKey(razorpayKey);
         const onPaymentSuccess = (response) => {
-          handlePaymentConfirmation(response, appointmentId, razorpayKey);
+          handlePaymentConfirmation(response, appointmentId, razorpayKey, amount, currency);
         };
         const handleExit = () => {
           onClose();
@@ -170,7 +170,7 @@ function AppointmentSlotDetails({
       })
       .catch((err) => {
         console.log(err, 'Error');
-        setError(err.response.data.errorMessage || 'Something Went Wrong');
+        setError(err?.response?.data?.errorMessage || 'Something Went Wrong');
         setErrorOpen(true);
       });
   };
@@ -181,18 +181,17 @@ function AppointmentSlotDetails({
     setErrorOpen(true);
   };
 
-  const handlePaymentConfirmation = (response, appointmentId, key) => {
+  const handlePaymentConfirmation = (response, appointmentId, key, amount, currency) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       response;
     dispatch(updateBackdrop(true));
-    // const { appointmentId } = bookedDoctorDetails;
     const payload = {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
       appointment_id: appointmentId,
-      amount: "500.00",
-      currency: "INR",
+      amount: amount,
+      currency: currency,
       method: "upi",
       key: key,
     };
@@ -200,12 +199,17 @@ function AppointmentSlotDetails({
     paymentConfirmation(payload).then((res) => {
       dispatch(updateBackdrop(false));
       console.log(res, "Repsoen");
-      // setRouteName('success');
       paymentSuccess();
+    }).catch((err) => {
+      dispatch(updateBackdrop(false));
+      console.log(err, "ConfirmPayment Error");
+      setError(err?.response?.data?.errorMessage || 'Payment confirmation failed');
+      setErrorOpen(true);
     });
   };
   const [reasonForVisit, setReasonForVisit] = useState("");
   const [bookingFor, setBookingFor] = useState("");
+  const [paymentMode, setPaymentMode] = useState("online");
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedSlot) {
@@ -231,7 +235,7 @@ function AppointmentSlotDetails({
       time: formatTime(selectedSlot),
       hospitalId: 3,
       consMode: "I",
-      paymentMethod: "ONLINE_PAYMENT",
+      paymentMethod: paymentMode === "hospital" ? "PAY_AT_HOSPITAL" : "ONLINE_PAYMENT",
       reasonForVisit: reasonForVisit,
     };
 
@@ -250,24 +254,26 @@ function AppointmentSlotDetails({
         paymentSuccess();
         console.log(res, "Response");
       });
-      // rescheduleAppointments
-    } else {
-      // handlePayment(bookedDoctorDetails);
-
+    } else if (paymentMode === "hospital") {
       try {
-        // 🔹 Wait for dispatch to finish
+        await dispatch(bookAppointmentThunk(payload)).unwrap();
+        paymentSuccess();
+      } catch (error) {
+        setError(error?.response?.data?.errorMessage || 'Something went wrong');
+        setErrorOpen(true);
+      }
+    } else {
+      try {
         const bookingResult = await dispatch(
           bookAppointmentThunk(payload)
         ).unwrap();
 
         console.log("Booking success", bookingResult);
 
-        // 🔹 Now call payment
-        handlePayment(bookingResult); // or bookedDoctorDetails if that's what you want
+        handlePayment(bookingResult);
       } catch (error) {
         setError(error?.response?.data?.errorMessage || 'Something went wrong');
         setErrorOpen(true);
-        // Show error message to user
       }
     }
   };
@@ -537,6 +543,42 @@ function AppointmentSlotDetails({
                   </TextField>
                 </Grid>
               </Grid>
+              <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                <Button
+                  variant={paymentMode === 'online' ? 'contained' : 'outlined'}
+                  size='small'
+                  onClick={() => setPaymentMode('online')}
+                  sx={{
+                    borderRadius: '20px',
+                    textTransform: 'none',
+                    backgroundColor: paymentMode === 'online' ? '#04BA8E' : 'transparent',
+                    borderColor: '#04BA8E',
+                    color: paymentMode === 'online' ? '#fff' : '#04BA8E',
+                    '&:hover': {
+                      backgroundColor: paymentMode === 'online' ? '#04BA8E' : '#e8faf5',
+                    },
+                  }}
+                >
+                  Pay Online (₹500)
+                </Button>
+                <Button
+                  variant={paymentMode === 'hospital' ? 'contained' : 'outlined'}
+                  size='small'
+                  onClick={() => setPaymentMode('hospital')}
+                  sx={{
+                    borderRadius: '20px',
+                    textTransform: 'none',
+                    backgroundColor: paymentMode === 'hospital' ? '#04BA8E' : 'transparent',
+                    borderColor: '#04BA8E',
+                    color: paymentMode === 'hospital' ? '#fff' : '#04BA8E',
+                    '&:hover': {
+                      backgroundColor: paymentMode === 'hospital' ? '#04BA8E' : '#e8faf5',
+                    },
+                  }}
+                >
+                  Pay at Hospital
+                </Button>
+              </Box>
               {error && <Typography sx={{ color: 'red', mx: 0.5 }}>{error}</Typography>}
 
               {/* Proceed Button */}
@@ -555,7 +597,11 @@ function AppointmentSlotDetails({
                   },
                 }}
               >
-                {status === 'RESCHEDULE' ? 'Confirm Appointment' : ' Proceed to Pay Rs 500.00'}
+                {status === 'RESCHEDULE'
+                  ? 'Confirm Appointment'
+                  : paymentMode === 'hospital'
+                    ? 'Book Appointment'
+                    : 'Proceed to Pay Rs 500.00'}
               </Button>
             </Box>
           </Box>

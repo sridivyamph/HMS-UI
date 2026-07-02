@@ -48,7 +48,7 @@ import {
   getUserDetails,
   getUserAppointment,
   cancelAppointment,
-  retryPayment,
+  createOrder,
   paymentConfirmation,
   updatePaymentStatusAtHospital,
 } from '../../../Services/PatientServices';
@@ -279,13 +279,13 @@ const PatientDashboard = () => {
   };
 
   const handlePayNow = (appoinment) => {
-    const payload = { param: appoinment.appointmentId };
-    retryPayment(payload).then((res) => {
+    const payload = { appointmentId: appoinment.appointmentId };
+    createOrder(payload).then((res) => {
       console.log(res.data, 'Data');
       const { amount, currency, razorpayKey, orderId } = res.data;
 
       const onPaymentSuccess = (response) => {
-        handlePaymentConfirmation(response, appoinment.appointmentId, razorpayKey);
+        handlePaymentConfirmation(response, appoinment.appointmentId, razorpayKey, amount, currency);
       };
 
       const options = {
@@ -315,19 +315,18 @@ const PatientDashboard = () => {
     });
   };
 
-  const handlePaymentConfirmation = (response, appointmentId, key) => {
+  const handlePaymentConfirmation = (response, appointmentId, key, amount, currency) => {
     dispatch(updateBackdrop(true));
     console.log('Hiititng here');
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = response;
     console.log(appointmentId, key, 'bookedDoctorDetails');
-    // const { appointmentId } = bookedDoctorDetails;
     const payload = {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
       appointment_id: appointmentId,
-      amount: '500.00',
-      currency: 'INR',
+      amount: amount,
+      currency: currency,
       method: 'upi',
       key: key,
     };
@@ -337,8 +336,11 @@ const PatientDashboard = () => {
       dispatch(updateBackdrop(false));
       setUpdateDialogMessage('Your appointment has been confirmed successfully.');
       setBookingSuccessOpen(true);
-      // setRouteName('success');
-      // paymentSuccess();
+    }).catch((err) => {
+      dispatch(updateBackdrop(false));
+      console.log(err, 'ConfirmPayment Error');
+      setError(err?.response?.data?.errorMessage || 'Payment confirmation failed');
+      setErrorOpen(true);
     });
   };
 
@@ -540,7 +542,7 @@ const PatientDashboard = () => {
                         top: 0,
                         bottom: 0,
                         width: '5px',
-                        bgcolor: appt.bookingStatus === 'X' ? '#BA1904' : '#04BA8E',
+                        bgcolor: (appt.bookingStatus === 'X') ? '#BA1904' : '#04BA8E',
                         borderRadius: '3px 0 0 3px',
                       }}
                     />
@@ -667,7 +669,7 @@ const PatientDashboard = () => {
                         </MenuItem>
                       </Menu>
                       {/* Appointment Time */}
-                      {appt.bookingStatus === 'X' ? (
+                      {(appt.bookingStatus === 'X' ) ? (
                         <>
                           <Chip
                             label='Cancelled'

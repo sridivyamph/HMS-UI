@@ -68,7 +68,7 @@ export const getAllUserAppointment = (payload) => {
 };
 
 export const getUserAppointment = (payload) => {
-  return api.get(`/users/profile/${payload.param}/appointments?type=all`, {});
+  return api.get(`/users/profile/${payload.param}/appointments?type=all&size=100`, {});
 };
 export const getPatientProfileById = (id) => {
   return api.get(`/users/profile/${id}`, {});

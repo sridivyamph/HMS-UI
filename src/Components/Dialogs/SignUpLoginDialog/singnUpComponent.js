@@ -56,7 +56,6 @@ const SignupComponent = ({ open, onClose, phoneNumber, setPhoneNumber }) => {
     let PhonenationalNumber = phoneNumber
       ? parsePhoneNumberFromString(phoneNumber, country.toUpperCase())
       : null;
-    setPhoneNumber(PhonenationalNumber.nationalNumber);
     const loginBody = {
       mobileNumber: PhonenationalNumber.nationalNumber,
       hospitalId: hospitalId || '3',

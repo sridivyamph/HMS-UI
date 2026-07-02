@@ -271,7 +271,9 @@ const ReceptionPatientProfile = () => {
   const updatePaymentStatus = async (appt) => {
     const payload = {
       param: appt.appointmentId,
-      payload: { paymentStatus: 'CASH_PAID' },
+      payload: { paymentStatus: 'CASH_PAID',
+        updatedBy:"user",
+      },
     };
     
     try {
@@ -817,8 +819,8 @@ const ReceptionPatientProfile = () => {
                                     size='small'
                                     variant='outlined'
                                     sx={{
-                                      borderColor: appt.paymentStatus === 'CASH_PAID' ? '#04BA8E' : '#E0E0E0',
-                                      color: appt.paymentStatus === 'CASH_PAID' ? '#04BA8E' : '#999',
+                                      borderColor: appt.paymentStatus === 'Cash Paid' || appt.paymentStatus === 'CASH_PAID' ? '#04BA8E' : '#E0E0E0',
+                                      color: appt.paymentStatus === 'Cash Paid' || appt.paymentStatus === 'CASH_PAID' ? '#04BA8E' : '#999',
                                       fontWeight: 500,
                                       fontSize: 11,
                                     }}
@@ -864,9 +866,11 @@ const ReceptionPatientProfile = () => {
                                       },
                                     }}
                                   >
-                                    {appt.bookingStatus !== 'C' &&
-                                      appt.bookingStatus !== 'X' &&
-                                      appt.paymentMethod !== 'Online Payment' && (
+                                    {appt.bookingStatus !== '' &&
+                                      appt.paymentStatus !== 'Cash Paid' &&
+                                      appt.paymentStatus !== 'CASH_PAID' &&
+                                      appt.paymentStatus !== 'Online Paid' &&
+                                      appt.paymentStatus !== 'Refunded' && (
                                         <MenuItem
                                           onClick={() => {
                                             updatePaymentStatus(appt);
@@ -885,7 +889,7 @@ const ReceptionPatientProfile = () => {
                                             },
                                           }}
                                         >
-                                          Update Payment
+                                          Mark as Cash Paid
                                         </MenuItem>
                                       )}
                                     {appt.bookingStatus !== 'X' &&
