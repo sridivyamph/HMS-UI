@@ -29,15 +29,15 @@ const DoctorRegistration = () => {
     phone: '',
     username: '',
     emailId: '',
-    // referenceType: '',
     hospId: 3,
     secondaryEmail: '',
     secondaryMob: '',
-    // pincode: '',
     city: '',
     address: '',
     country: '',
     stateId: '',
+    admissionRight: '',
+    status: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -53,6 +53,18 @@ const DoctorRegistration = () => {
   const [anesthetist, setanesthetist] = useState([
     { categoryId: 'Y', categoryDetailName: 'Yes' },
     { categoryId: 'N', categoryDetailName: 'No' },
+  ]);
+
+  // ADMISSION RIGHT
+  const [admissionRightOptions] = useState([
+    { categoryId: 'Y', categoryDetailName: 'Yes' },
+    { categoryId: 'N', categoryDetailName: 'No' },
+  ]);
+
+  // STATUS
+  const [statusOptions] = useState([
+    { categoryId: 'A', categoryDetailName: 'Active' },
+    { categoryId: 'I', categoryDetailName: 'Inactive' },
   ]);
 
   // COUNTRY STATE CITY
@@ -87,6 +99,8 @@ const DoctorRegistration = () => {
     emailId: 'Email Id',
     secondaryEmail: 'secondaryEmail',
     secondaryMob: 'secondaryMob',
+    admissionRight: 'Admission Right',
+    status: 'Status',
   };
 
   useEffect(() => {
@@ -195,10 +209,10 @@ const DoctorRegistration = () => {
         doctorRegNo: formData.regNo,
         anesthetist: formData.anesthetist,
         degree: formData.degree,
-        admissionRight: formData.admissionRight || 'N',
+        admissionRight: formData.admissionRight,
         doctorType: formData.doctorType || 0,
         emailId: formData.emailId,
-        status: 'A',
+        status: formData.status,
         secondaryEmail: formData.secondaryEmail,
         qualification: formData.qualification || formData.degree,
         hospId: formData.hospId,
@@ -264,7 +278,7 @@ const DoctorRegistration = () => {
                 <Grid container spacing={2}>
                   {[
                     { name: 'name', label: 'Enter your Name*' },
-                    { name: 'doctorCode', label: 'Enter your Doctor Code' },
+                    { name: 'doctorCode', label: 'Enter your Doctor Code*' },
                   ].map((field) => (
                     <Grid item xs={12} md={6} key={field.name}>
                       <TextField
@@ -285,7 +299,7 @@ const DoctorRegistration = () => {
                       fullWidth
                       select
                       type='number'
-                      label='Enter your Department'
+                      label='Enter your Department*'
                       name='departmentName'
                       value={formData.departmentName}
                       onChange={handleChange}
@@ -306,7 +320,7 @@ const DoctorRegistration = () => {
                       fullWidth
                       select
                       type='number'
-                      label='Specialization Type'
+                      label='Specialization Type*'
                       name='specialization'
                       value={formData.specialization}
                       onChange={handleChange}
@@ -327,7 +341,7 @@ const DoctorRegistration = () => {
                       fullWidth
                       select
                       type='number'
-                      label='Enter your Designation'
+                      label='Enter your Designation*'
                       name='designation'
                       value={formData.designation}
                       onChange={handleChange}
@@ -346,7 +360,7 @@ const DoctorRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your Degree'
+                      label='Enter your Degree*'
                       name='degree'
                       value={formData.degree}
                       onChange={handleChange}
@@ -358,7 +372,7 @@ const DoctorRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your Doctor Reg. No'
+                      label='Enter your Doctor Reg. No*'
                       name='regNo'
                       value={formData.regNo}
                       onChange={handleChange}
@@ -372,7 +386,7 @@ const DoctorRegistration = () => {
                       fullWidth
                       type='number'
                       select
-                      label='Enter your Anesthetist'
+                      label='Enter your Anesthetist*'
                       name='anesthetist'
                       value={formData.anesthetist}
                       onChange={handleChange}
@@ -392,7 +406,7 @@ const DoctorRegistration = () => {
                       fullWidth
                       select
                       type='number'
-                      label='Doctor Type'
+                      label='Doctor Type*'
                       name='doctorType'
                       value={formData.doctorType}
                       onChange={handleChange}
@@ -410,38 +424,58 @@ const DoctorRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your Phone Number'
-                      name='phone'
-                      value={formData.phone}
+                      select
+                      label='Admission Right*'
+                      name='admissionRight'
+                      value={formData.admissionRight}
                       onChange={handleChange}
-                      error={Boolean(errors.phone)}
-                      helperText={errors.phone}
+                      error={Boolean(errors.admissionRight)}
+                      helperText={errors.admissionRight}
                       sx={textFieldStyles}
-                      onInput={(e) => {
-                        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
-                      }}
+                    >
+                      {admissionRightOptions.map((option) => (
+                        <MenuItem key={option.categoryId} value={option.categoryId}>
+                          {option.categoryDetailName}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      select
+                      label='Status*'
+                      name='status'
+                      value={formData.status}
+                      onChange={handleChange}
+                      error={Boolean(errors.status)}
+                      helperText={errors.status}
+                      sx={textFieldStyles}
+                    >
+                      {statusOptions.map((option) => (
+                        <MenuItem key={option.categoryId} value={option.categoryId}>
+                          {option.categoryDetailName}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label='Enter your Phone Number*'
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your secondary Number'
-                      name='secondaryMob'
-                      value={formData.secondaryMob}
-                      onChange={handleChange}
-                      error={Boolean(errors.secondaryMob)}
-                      helperText={errors.secondaryMob}
-                      sx={textFieldStyles}
-                      onInput={(e) => {
-                        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
-                      }}
+                      label='Enter your secondary Number*'
                     />
                   </Grid>
 
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your Email Id'
+                      label='Enter your Email Id*'
                       name='emailId'
                       type='email'
                       value={formData.emailId}
@@ -454,7 +488,7 @@ const DoctorRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter Your Secondary Email Id'
+                      label='Enter Your Secondary Email Id*'
                       name='secondaryEmail'
                       type='email'
                       value={formData.secondaryEmail}
@@ -468,7 +502,7 @@ const DoctorRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your User Name'
+                      label='Enter your User Name*'
                       name='username'
                       value={formData.username}
                       onChange={handleChange}
@@ -508,7 +542,7 @@ const DoctorRegistration = () => {
                     <TextField
                       fullWidth
                       select
-                      label='Country'
+                      label='Country*'
                       name='country'
                       value={formData.country}
                       onChange={handleChange}
@@ -529,7 +563,7 @@ const DoctorRegistration = () => {
                     <TextField
                       fullWidth
                       select
-                      label='State'
+                      label='State*'
                       name='stateId'
                       value={formData.stateId}
                       onChange={handleChange}
@@ -551,14 +585,7 @@ const DoctorRegistration = () => {
                     <TextField
                       fullWidth
                       select
-                      label='City'
-                      name='city'
-                      value={formData.city}
-                      onChange={handleChange}
-                      disabled={!formData.stateId} // disable if state not selected
-                      error={Boolean(errors.city)}
-                      helperText={errors.city}
-                      sx={textFieldStyles}
+                      label='City*'
                     >
                       {cityList.map((city) => (
                         <MenuItem key={city.cityId} value={city.cityId}>
@@ -584,7 +611,7 @@ const DoctorRegistration = () => {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label='Address'
+                      label='Address*'
                       name='address'
                       value={formData.address}
                       onChange={handleChange}

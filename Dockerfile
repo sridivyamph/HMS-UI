@@ -22,6 +22,9 @@ FROM nginx:alpine
 # Copy the built React files from the previous stage to the Nginx web server's directory
 COPY --from=0 /app/build /usr/share/nginx/html
 
+# Copy custom Nginx config to proxy /config/ API requests
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80 to the outside world
 EXPOSE 80
 

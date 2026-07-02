@@ -23,7 +23,6 @@ const StaffRegistration = () => {
     designation: '',
     degree: '',
     secondaryEmail: '',
-    // qualification: '',
     address: '',
     cityId: '',
     pinCode: '',
@@ -32,6 +31,7 @@ const StaffRegistration = () => {
     username: '',
     emailId: '',
     referenceType: '',
+    status: '',
     hospId: hospitalId,
   });
 
@@ -45,6 +45,10 @@ const StaffRegistration = () => {
   const [referenceTypeList, setreferenceTypeList] = useState([
     { categoryId: 'RECEPTIONIST', categoryDetailName: 'RECEPTIONIST' },
     { categoryId: 'LAB-TECHNICIAN', categoryDetailName: 'LAB-TECHNICIAN' },
+  ]);
+  const [statusOptions] = useState([
+    { categoryId: 'A', categoryDetailName: 'Active' },
+    { categoryId: 'I', categoryDetailName: 'Inactive' },
   ]);
   const [apiResponse, setApiResponse] = useState('');
   const FIELD_LABELS = {
@@ -64,6 +68,7 @@ const StaffRegistration = () => {
     username: 'Username',
     emailId: 'Email ID',
     referenceType: 'Reference Type',
+    status: 'Status',
   };
 
   useEffect(() => {
@@ -163,7 +168,7 @@ const StaffRegistration = () => {
       pinCode: Number(formData.pinCode),
       stateId: Number(formData.stateId),
       countryId: Number(formData.countryId),
-      status: 'A',
+      status: formData.status,
       username: formData.username,
       emailId: formData.emailId,
       referenceType: formData.referenceType,
@@ -225,7 +230,7 @@ const StaffRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Staff Name'
+                      label='Staff Name*'
                       name='staffName'
                       value={formData.staffName}
                       onChange={handleChange}
@@ -237,7 +242,7 @@ const StaffRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter Your Username'
+                      label='Enter Your Username*'
                       name='username'
                       value={formData.username}
                       onChange={handleChange}
@@ -249,7 +254,7 @@ const StaffRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your Degree'
+                      label='Enter your Degree*'
                       name='degree'
                       value={formData.degree}
                       onChange={handleChange}
@@ -261,7 +266,7 @@ const StaffRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your Phone Number'
+                      label='Enter your Phone Number*'
                       name='mobileNo'
                       value={formData.mobileNo}
                       onChange={handleChange}
@@ -276,7 +281,7 @@ const StaffRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your secondary Number'
+                      label='Enter your secondary Number*'
                       name='secondaryMob'
                       value={formData.secondaryMob}
                       onChange={handleChange}
@@ -291,7 +296,7 @@ const StaffRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your Email Id'
+                      label='Enter your Email Id*'
                       name='emailId'
                       type='email'
                       value={formData.emailId}
@@ -304,7 +309,7 @@ const StaffRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter Your Secondary Email Id'
+                      label='Enter Your Secondary Email Id*'
                       name='secondaryEmail'
                       type='email'
                       value={formData.secondaryEmail}
@@ -319,7 +324,7 @@ const StaffRegistration = () => {
                     <TextField
                       fullWidth
                       select
-                      label='Gender'
+                      label='Gender*'
                       name='gender'
                       value={formData.gender}
                       onChange={handleChange}
@@ -336,7 +341,7 @@ const StaffRegistration = () => {
                     <TextField
                       fullWidth
                       select
-                      label='Designation'
+                      label='Designation*'
                       name='designation'
                       value={formData.designation}
                       onChange={handleChange}
@@ -355,7 +360,7 @@ const StaffRegistration = () => {
                     <TextField
                       fullWidth
                       select
-                      label='Enter your referenceType'
+                      label='Enter your referenceType*'
                       name='referenceType'
                       value={formData.referenceType}
                       onChange={handleChange}
@@ -370,12 +375,31 @@ const StaffRegistration = () => {
                       ))}
                     </TextField>
                   </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      select
+                      label='Status*'
+                      name='status'
+                      value={formData.status}
+                      onChange={handleChange}
+                      error={Boolean(errors.status)}
+                      helperText={errors.status}
+                      sx={textFieldStyles}
+                    >
+                      {statusOptions.map((option) => (
+                        <MenuItem key={option.categoryId} value={option.categoryId}>
+                          {option.categoryDetailName}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
                   {/* Country */}
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       select
-                      label='Country'
+                      label='Country*'
                       name='countryId'
                       value={formData.countryId}
                       onChange={handleChange}
@@ -395,7 +419,7 @@ const StaffRegistration = () => {
                     <TextField
                       fullWidth
                       select
-                      label='State'
+                      label='State*'
                       name='stateId'
                       value={formData.stateId}
                       onChange={handleChange}
@@ -416,7 +440,7 @@ const StaffRegistration = () => {
                     <TextField
                       fullWidth
                       select
-                      label='City'
+                      label='City*'
                       name='cityId'
                       value={formData.cityId}
                       onChange={handleChange}
@@ -435,7 +459,7 @@ const StaffRegistration = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label='Enter your pinCode'
+                      label='Enter your pinCode*'
                       name='pinCode'
                       value={formData.pinCode}
                       onChange={handleChange}
@@ -448,7 +472,7 @@ const StaffRegistration = () => {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label='Address'
+                      label='Address*'
                       name='address'
                       value={formData.address}
                       onChange={handleChange}
