@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import React, { Suspense, lazy, useEffect } from 'react';
 import Spinner from './Components/Backdrop/Backdrop';
 import BackToTop from './Components/BackToTop/BackToTop';
@@ -47,8 +47,6 @@ const Blog = lazy(() => import('./Pages/Public/Blog'));
 const Careers = lazy(() => import('./Pages/Public/Careers'));
 const ContactUs = lazy(() => import('./Pages/Public/ContactUs'));
 
-// NO ROUTES FOUND
-const NotFound = lazy(() => import('./Components/NotFound/NotFound'));
 const Main = () => {
   const { showBackdrop } = useSelector((state) => state.home);
   const dispatch = useDispatch();
@@ -205,7 +203,7 @@ const Main = () => {
         <Route path='/careers' element={<Careers />} />
         <Route path='/contact-us' element={<ContactUs />} />
         {/* NO ROUTES FOUND */}
-        <Route path='*' element={<NotFound />} />
+        <Route path='*' element={<Navigate to='/patient/login' replace />} />
       </Routes>
     </Suspense>   
   );

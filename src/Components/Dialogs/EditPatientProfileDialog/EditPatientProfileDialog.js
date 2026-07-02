@@ -11,13 +11,10 @@ import {
   Typography,
 } from '@mui/material';
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const EditProfileDialog = ({ open, onClose, initialData, onSubmit }) => {
   const [form, setForm] = useState({
     name: initialData.name || '',
     dob: initialData.dob || '',
-    email: initialData.email || '',
     gender: initialData.gender || '',
   });
 
@@ -30,9 +27,6 @@ const EditProfileDialog = ({ open, onClose, initialData, onSubmit }) => {
 
     if (!form.dob) newErrors.dob = 'Date of Birth is required';
     else if (new Date(form.dob) >= new Date()) newErrors.dob = 'Date of Birth must be in the past';
-
-    if (!form.email.trim()) newErrors.email = 'Email is required';
-    else if (!emailRegex.test(form.email)) newErrors.email = 'Email is not valid';
 
     if (!form.gender) newErrors.gender = 'Gender is required';
 
@@ -77,16 +71,6 @@ const EditProfileDialog = ({ open, onClose, initialData, onSubmit }) => {
               onChange={handleChange('dob')}
               error={!!errors.dob}
               helperText={errors.dob}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label='Email'
-              value={form.email}
-              onChange={handleChange('email')}
-              error={!!errors.email}
-              helperText={errors.email}
             />
           </Grid>
           <Grid item xs={12}>
