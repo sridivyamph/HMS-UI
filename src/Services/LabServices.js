@@ -31,7 +31,9 @@ export const getUserData = async (payload) => {
 };
 
 export const downloadReport = async (param) => {
-  const response = await api.get(`/api/lab-reports/download/${param}`);
+  const response = await api.get(`/api/lab-reports/download/${param}`, {
+    responseType: 'blob',
+  });
   return response.data;
 };
 

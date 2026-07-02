@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Grid,
   TextField,
   Paper,
-  Menu,
-  MenuItem,
-  IconButton,
-  Tabs,
-  Tab,
   Table,
   TableBody,
   TableCell,
@@ -21,73 +16,51 @@ import {
   TablePagination,
   Skeleton,
 } from '@mui/material';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import AddIcon from '@mui/icons-material/Add';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import DocHeader from '../../../Components/Header/DocHeader';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  fetchDoctorUpcomingAppointmentsList,
-  fetchDoctorPreviousAppointmentsList,
-} from '../../../Redux/Modules/Doctor/DoctorThunk';
 import AdminHeader from '../../../Components/Header/adminHeader';
-import { adminListUsers } from '../../../Services/adminService';
+import { listUsersThunk } from '../../../Redux/Modules/Admin/AdminThunk';
+import { setPagination, setSearchText, setDebouncedText } from '../../../Redux/Modules/Admin/AdminSlice';
 import SearchIcon from '@mui/icons-material/Search';
 
-const MIN_SEARCH_LENGTH = 3;
 const DEBOUNCE_DELAY = 1000;
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-
-  const [pagination, setPagination] = useState({ page: 0, size: 10 });
-  const [userList, setuserList] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [debouncedText, setDebouncedText] = useState('');
   const dispatch = useDispatch();
+  const { userList, loading, pagination, searchText, debouncedText } = useSelector((state) => state.admin);
 
   const handlePageChange = (event, newPage) => {
-    setPagination((prev) => ({ ...prev, page: newPage }));
+    dispatch(setPagination({ ...pagination, page: newPage }));
   };
 
   const handleSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
-    setPagination((prev) => ({ ...prev, size: newSize, page: 0 }));
+    dispatch(setPagination({ ...pagination, size: newSize, page: 0 }));
   };
 
   useEffect(() => {
-    setLoading(true);
-
-    adminListUsers({
+    dispatch(listUsersThunk({
       page: pagination.page,
       size: pagination.size,
-      searchQuery: debouncedText, // debouncedText should be your search input
-    })
-      .then((data) => {
-        setLoading(false);
-
-        setuserList(data);
-      })
-      .catch((err) => {
-        setLoading(false);
-      });
-  }, [pagination.page, pagination.size, debouncedText]);
+      searchQuery: debouncedText,
+    }));
+  }, [pagination.page, pagination.size, debouncedText, dispatch]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       const trimmedText = searchText.trim();
-      setDebouncedText(trimmedText);
+      dispatch(setDebouncedText(trimmedText));
     }, DEBOUNCE_DELAY);
 
     return () => clearTimeout(timer);
-  }, [searchText]);
+  }, [searchText, dispatch]);
+
   const handleInputChange = (event) => {
     const value = event.target.value;
-    setSearchText(value);
+    dispatch(setSearchText(value));
   };
 
   return (

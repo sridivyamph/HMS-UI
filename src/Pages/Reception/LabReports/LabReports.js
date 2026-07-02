@@ -39,18 +39,21 @@ const LabReports = () => {
   }, [dispatch, id]);
 
   const linkToDownload = async (id, fileName) => {
-    const result = await dispatch(downloadReportDoc(id));
-    const url = result.payload.s3Url;
-
-    if (url) {
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", fileName);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      console.error("Download URL not found");
+    try {
+      const result = await dispatch(downloadReportDoc(id));
+      const blob = result.payload;
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
     }
   };
 
