@@ -207,7 +207,7 @@ const Main = () => {
         {/* NO ROUTES FOUND */}
         <Route path='*' element={<NotFound />} />
       </Routes>
-    </Suspense>
+    </Suspense>   
   );
 };
 

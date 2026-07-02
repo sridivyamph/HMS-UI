@@ -121,18 +121,16 @@ const LabReport = () => {
   };
   const handleDownload = async (reportId, fileName) => {
     try {
-      const result = await downloadReport(reportId);
-      const url = result.s3Url;
-
-      if (url) {
+      const blob = await downloadReport(reportId);
+      if (blob) {
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', fileName);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      } else {
-        console.error('Download URL not found');
+        URL.revokeObjectURL(url);
       }
     } catch (error) {
       console.error('Download failed:', error);
