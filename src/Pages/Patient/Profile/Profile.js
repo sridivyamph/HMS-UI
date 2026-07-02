@@ -39,7 +39,6 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import ScienceIcon from '@mui/icons-material/Science';
 import PersonIcon from '@mui/icons-material/Person';
-import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import WcIcon from '@mui/icons-material/Wc';
 import CakeIcon from '@mui/icons-material/Cake';
@@ -58,7 +57,6 @@ const Profile = () => {
   const [editForm, setEditForm] = useState({
     name: '',
     dob: '',
-    email: '',
     gender: '',
   });
   const [userError, setUserError] = useState('');
@@ -98,7 +96,6 @@ const Profile = () => {
           { label: 'Name', value: userObject.name || 'N/A', icon: <PersonIcon fontSize='small' /> },
           { label: 'Gender', value: userObject.gender || 'N/A', icon: <WcIcon fontSize='small' /> },
           { label: 'Age', value: age, icon: <CakeIcon fontSize='small' /> },
-          { label: 'Email', value: userObject.email || 'N/A', icon: <EmailIcon fontSize='small' /> },
           { label: 'Phone', value: userObject.mobileNo || 'N/A', icon: <PhoneIcon fontSize='small' /> },
         ];
         setuserData(userDetailsArray);
@@ -164,7 +161,6 @@ const Profile = () => {
         { label: 'Name', value: userObject.name || 'N/A', icon: <PersonIcon fontSize='small' /> },
         { label: 'Gender', value: userObject.gender || 'N/A', icon: <WcIcon fontSize='small' /> },
         { label: 'Age', value: age, icon: <CakeIcon fontSize='small' /> },
-        { label: 'Email', value: userObject.email || 'N/A', icon: <EmailIcon fontSize='small' /> },
         { label: 'Phone', value: userObject.mobileNo || 'N/A', icon: <PhoneIcon fontSize='small' /> },
       ]);
     } catch {
@@ -265,7 +261,6 @@ const Profile = () => {
                       setEditForm({
                         name: rawUser?.name || '',
                         dob: rawUser?.dateOfBirth || '',
-                        email: rawUser?.email || '',
                         gender: rawUser?.gender || '',
                       });
                       setEditOpen(true);
