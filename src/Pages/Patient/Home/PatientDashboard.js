@@ -542,7 +542,7 @@ const PatientDashboard = () => {
                         top: 0,
                         bottom: 0,
                         width: '5px',
-                        bgcolor: (appt.bookingStatus === 'X' || appt.bookingStatus === 'C') ? '#BA1904' : '#04BA8E',
+                        bgcolor: (appt.bookingStatus === 'X') ? '#BA1904' : '#04BA8E',
                         borderRadius: '3px 0 0 3px',
                       }}
                     />
@@ -669,7 +669,7 @@ const PatientDashboard = () => {
                         </MenuItem>
                       </Menu>
                       {/* Appointment Time */}
-                      {(appt.bookingStatus === 'X' || appt.bookingStatus === 'C') ? (
+                      {(appt.bookingStatus === 'X' ) ? (
                         <>
                           <Chip
                             label='Cancelled'
