@@ -11,7 +11,6 @@ const getLoginPathFromURL = (pathname) => {
 
 const ProtectedRoute = ({ children, accessRoles }) => {
   const location = useLocation();
-  console.log(location.pathname, "location.pathname");
   const token = localStorage.getItem("access_token");
   const isAuthenticated = !!token;
   const userRole = localStorage.getItem("user_role");
