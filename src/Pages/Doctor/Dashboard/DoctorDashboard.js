@@ -420,7 +420,7 @@ const DocDashboard = () => {
                       <>
                         {appointmentList?.content?.length > 0 &&
                           appointmentList?.content
-                            // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((appointment, index) => (
                               <TableRow
                                 sx={{
@@ -472,7 +472,7 @@ const DocDashboard = () => {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 15]}
                 component='div'
-                count={appointmentList?.page?.totalElements}
+                count={appointmentList?.totalElements || 0}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
