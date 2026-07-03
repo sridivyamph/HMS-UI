@@ -74,7 +74,7 @@ const StaffRegistration = () => {
   useEffect(() => {
     // Load designation list
     adminLoadDefaultfields().then((data) => {
-      setDesgList(data.DESG || []);
+      setDesgList(data.DESG?.filter(d => ![96, 97, 98].includes(d.categoryId)) || []);
     });
 
     // Load country list

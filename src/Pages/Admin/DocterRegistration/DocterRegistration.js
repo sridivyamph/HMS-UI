@@ -97,7 +97,7 @@ const DoctorRegistration = () => {
 
   useEffect(() => {
     adminLoadDefaultfields().then((data) => {
-      setDesgList(data.DESG || []);
+      setDesgList(data.DESG?.filter(d => [96, 97, 98].includes(d.categoryId)) || []);
       setDeptList(data.DEPT || []);
       setDocTypeList(data.DOCTYPE || []);
       setSpecTypeList(data.SPECTYPE || []);
