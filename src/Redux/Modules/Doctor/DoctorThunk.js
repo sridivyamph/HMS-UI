@@ -19,16 +19,14 @@ export const appUserDataCall = createAsyncThunk(
 export const fetchDoctorUpcomingAppointmentsList = createAsyncThunk(
   'doctor/fetchDoctorUpcomingAppointmentsList',
   async(payload) => {
-    console.log(payload.param)
-    const data = await fetchDoctorAppointments(payload.param, payload.filter);
+    const data = await fetchDoctorAppointments(payload.param, payload.filter, payload.page, payload.size);
     return data;
   }
 )
 export const fetchDoctorPreviousAppointmentsList = createAsyncThunk(
   'doctor/fetchDoctorPreviousAppointmentsList',
   async(payload) => {
-    console.log(payload.param)
-    const data = await fetchDoctorAppointments(payload.param, payload.filter);
+    const data = await fetchDoctorAppointments(payload.param, payload.filter, payload.page, payload.size);
     return data;
   }
 )
