@@ -226,7 +226,7 @@ const AdminDashboard = () => {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 15]}
                 component='div'
-                count={userList?.page?.totalElements}
+                count={userList?.totalElements || 0}
                 rowsPerPage={pagination?.size}
                 page={pagination?.page}
                 onPageChange={handlePageChange}

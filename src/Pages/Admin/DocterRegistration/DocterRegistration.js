@@ -24,7 +24,6 @@ const DoctorRegistration = () => {
     specialization: '',
     degree: '',
     regNo: '',
-    anesthetist: '',
     doctorType: '',
     phone: '',
     username: '',
@@ -48,12 +47,6 @@ const DoctorRegistration = () => {
   const [deptList, setDeptList] = useState([]);
   const [docTypeList, setDocTypeList] = useState([]);
   const [specTypeList, setSpecTypeList] = useState([]);
-
-  // ANESTHIS
-  const [anesthetist, setanesthetist] = useState([
-    { categoryId: 'Y', categoryDetailName: 'Yes' },
-    { categoryId: 'N', categoryDetailName: 'No' },
-  ]);
 
   // ADMISSION RIGHT
   const [admissionRightOptions] = useState([
@@ -85,7 +78,6 @@ const DoctorRegistration = () => {
     specialization: 'Specialization',
     degree: 'Degree',
     regNo: 'Doctor Reg. No',
-    anesthetist: 'Anesthetist',
     doctorType: 'Doctor Type',
     phone: 'Phone Number',
     // pincode: 'Pin code',
@@ -207,7 +199,7 @@ const DoctorRegistration = () => {
         designation: formData.designation || 0,
         specializationType: formData.specialization || 0,
         doctorRegNo: formData.regNo,
-        anesthetist: formData.anesthetist,
+        anesthetist: 'Y',
         degree: formData.degree,
         admissionRight: formData.admissionRight,
         doctorType: formData.doctorType || 0,
@@ -380,26 +372,6 @@ const DoctorRegistration = () => {
                       helperText={errors.regNo}
                       sx={textFieldStyles}
                     />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      type='number'
-                      select
-                      label='Enter your Anesthetist*'
-                      name='anesthetist'
-                      value={formData.anesthetist}
-                      onChange={handleChange}
-                      error={Boolean(errors.anesthetist)}
-                      helperText={errors.anesthetist}
-                      sx={textFieldStyles}
-                    >
-                      {anesthetist.map((option) => (
-                        <MenuItem key={option.categoryId} value={option.categoryId}>
-                          {option.categoryDetailName}
-                        </MenuItem>
-                      ))}
-                    </TextField>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField
