@@ -16,9 +16,9 @@ export const rescheduleAppointments = async ({ payload, param }) => {
   return response.data;
 };
 
-export const fetchDoctorAppointments = async (param, filter) => {
+export const fetchDoctorAppointments = async (param, filter, page = 0, size = 5) => {
   try {
-    const response = await api.get(`/api/doctor/${param}/appointments?filter=${filter}`);
+    const response = await api.get(`/api/doctor/${param}/appointments?filter=${filter}&page=${page}&size=${size}`);
     return response.data;
   } catch (error) {
     if (error.response?.status === 404) {

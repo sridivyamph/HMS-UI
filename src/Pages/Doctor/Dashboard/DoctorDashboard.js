@@ -94,6 +94,8 @@ const DocDashboard = () => {
         fetchDoctorUpcomingAppointmentsList({
           param: doctorResponse.originalId,
           filter: 'upcoming',
+          page: page,
+          size: rowsPerPage,
         })
       );
     } else if (tabValue === 1) {
@@ -101,10 +103,12 @@ const DocDashboard = () => {
         fetchDoctorPreviousAppointmentsList({
           param: doctorResponse.originalId,
           filter: 'previous',
+          page: page,
+          size: rowsPerPage,
         })
       );
     }
-  }, [doctorResponse?.originalId, tabValue, dispatch]);
+  }, [doctorResponse?.originalId, tabValue, page, rowsPerPage, dispatch]);
 
   useEffect(() => {
     if (!doctorResponse?.originalId) return;
@@ -420,7 +424,7 @@ const DocDashboard = () => {
                       <>
                         {appointmentList?.content?.length > 0 &&
                           appointmentList?.content
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((appointment, index) => (
                               <TableRow
                                 sx={{
@@ -472,7 +476,7 @@ const DocDashboard = () => {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 15]}
                 component='div'
-                count={appointmentList?.totalElements || 0}
+                count={appointmentList?.page?.totalElements || 0}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
