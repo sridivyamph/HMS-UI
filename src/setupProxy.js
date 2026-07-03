@@ -1,8 +1,8 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const proxy = createProxyMiddleware({
-  target: 'https://gateway.zautomate.in',
-  // target: 'https://zcare.zautomate.in',
+  // target: 'https://gateway.zautomate.in',
+  target: 'https://zcare.zautomate.in',
   changeOrigin: true,
   secure: false,
   onProxyReq: (proxyReq, req) => {
