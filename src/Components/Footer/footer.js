@@ -93,7 +93,7 @@ const Footer = () => {
                   }}
                 >
                   <Link component={RouterLink} to='/service' color='inherit' underline='none'>
-                    Service
+                    Our Service
                   </Link>
                 </Typography>
                 <Typography
