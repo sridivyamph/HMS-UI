@@ -36,7 +36,7 @@ const Footer = () => {
               >
                 {' '}
                 <Typography variant='body2' sx={{ fontSize: 16, pt: 1.5 }}>
-                  Body Surgery
+                  Surgery
                 </Typography>
                 <Typography variant='body2' sx={{ fontSize: 16, pt: 1.5 }}>
                   Heart Surgery

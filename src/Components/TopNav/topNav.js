@@ -45,6 +45,15 @@ const TopNavbar = () => {
           >
             1800 309 900
           </Typography>
+          <Typography
+            variant='body1'
+            sx={{
+              color: '#034EA2',
+              ml: 2,
+            }}
+          >
+            8589088985
+          </Typography>
         </Box>
       </Toolbar>
     </AppBar>
