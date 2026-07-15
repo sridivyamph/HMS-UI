@@ -37,21 +37,26 @@ const VisitorCard = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const startMonth = "January 2025"
       const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
       const currentMonthName = currentDate.toLocaleString("default", {
         month: "long",
       });
-      const currentYear = currentDate.getFullYear();
+      const startMonth = `January ${currentYear}`;
       const endMonth = `${currentMonthName} ${currentYear}`;
       const range = `${startMonth} - ${endMonth}`;
       try {
         const action = await dispatch(fetchMonthlyVisitors(range));
         if (fetchMonthlyVisitors.fulfilled.match(action)) {
           const apiData = action.payload;
+          const currentYear = new Date().getFullYear();
+          const filteredData = apiData.filter((d) => {
+            const year = parseInt(d.month.split(" ")[1]);
+            return year === currentYear;
+          });
 
-          setLabels(apiData.map((d) => d.month));
-          setVisits(apiData.map((d) => d.visitors));
+          setLabels(filteredData.map((d) => d.month));
+          setVisits(filteredData.map((d) => d.visitors));
         } else {
           console.error("Fetch rejected", action.payload);
         }

@@ -58,6 +58,13 @@ const Profile = () => {
     name: '',
     dob: '',
     gender: '',
+    secondaryMobile: '',
+    secondaryEmail: '',
+    country: '',
+    stateId: '',
+    city: '',
+    address: '',
+    pin: '',
   });
   const [userError, setUserError] = useState('');
   const [appointmentError, setAppointmentError] = useState('');
@@ -262,6 +269,13 @@ const Profile = () => {
                         name: rawUser?.name || '',
                         dob: rawUser?.dateOfBirth || '',
                         gender: rawUser?.gender || '',
+                        secondaryMobile: rawUser?.secMobileNumber || '',
+                        secondaryEmail: rawUser?.secondaryEmail || '',
+                        country: rawUser?.country || '',
+                        stateId: rawUser?.stateId || '',
+                        city: rawUser?.city || '',
+                        address: rawUser?.address || '',
+                        pin: rawUser?.pin || '',
                       });
                       setEditOpen(true);
                     }}
