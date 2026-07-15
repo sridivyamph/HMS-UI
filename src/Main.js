@@ -12,6 +12,7 @@ import ReceptionProfile from './Pages/Reception/Profiles/ReceptionProfile';
 
 import LabDashboard from './Pages/LabTechnician/Home/LabDashboard';
 import LabPatientProfile from './Pages/LabTechnician/Profile/ViewPatientProfile';
+import LabProfile from './Pages/LabTechnician/Profile/LabProfile';
 import DoctorViewPatientProfile from './Pages/Doctor/ViewPatientProfile/ViewPatientProfile';
 
 // APP CONFIG
@@ -23,6 +24,7 @@ import CommonLogin from './Components/Login/login';
 
 const DocDashboard = lazy(() => import('./Pages/Doctor/Dashboard/DoctorDashboard'));
 const DoctorLogin = lazy(() => import('./Pages/Doctor/DoctorLogin/DoctorLogin'));
+const DoctorProfile = lazy(() => import('./Pages/Doctor/Profile/DoctorProfile'));
 const DoctorViewPatientProfileLabReports = lazy(() =>
   import('./Pages/Doctor/DoctorViewPatientLabReport/DoctorViewPatientLabReport')
 );
@@ -106,6 +108,14 @@ const Main = () => {
         />
 
         <Route
+          path='/doctor/profile'
+          element={
+            <ProtectedRoute accessRoles={['DOCTOR']}>
+              <DoctorProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path='/doctor/patientProfile/:userId'
           element={
             <ProtectedRoute accessRoles={['DOCTOR']}>
@@ -169,6 +179,14 @@ const Main = () => {
             </ProtectedRoute>
           }
         ></Route>
+        <Route
+          path='/lab/profile'
+          element={
+            <ProtectedRoute accessRoles={['LAB-TECHNICIAN']}>
+              <LabProfile />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path='/lab/patientProfile/:id'
           element={

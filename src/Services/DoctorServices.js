@@ -59,3 +59,10 @@ export const getDoctorVisitsAndConsults = async (param) => {
   const response = await api.get(`/api/reception/visits-and-consults${query}`);
   return response.data;
 };
+
+export const getDoctorMonthlyVisitors = async (monthYearRange, doctorId) => {
+  let endpoint = `/api/reception/visitors/monthly?monthYearRange=${encodeURIComponent(monthYearRange)}`;
+  if (doctorId) endpoint += `&doctorId=${doctorId}`;
+  const response = await api.get(endpoint);
+  return response.data;
+};

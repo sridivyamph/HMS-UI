@@ -3,17 +3,18 @@ import {
   Box, Container, Grid, Typography, Card, CardContent, Avatar, Button
 } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ReceptionHeader from '../../../Components/Header/ReceptionHeader';
+import LabHeader from '../../../Components/Header/LabHeader';
 import Footer from '../../../Components/Footer/footer';
 import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { appUserDataCall, appUserIdCall } from '../../../Redux/Modules/Reception/ReceptionThunk';
+import { getAppUserId, getUserData } from '../../../Services/LabServices';
+import { useDispatch, useSelector } from 'react-redux';
+import { appUserDataCall, appUserIdCall } from '../../../Redux/Modules/LabTechnician/LabThunk';
 
-const ReceptionProfile = () => {
+const LabProfile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { appConfig, isConfigLoaded } = useSelector((state) => state.auth);
-  const { userId, receptionData } = useSelector((state) => state.reception);
+  const { userId, technicianData } = useSelector((state) => state.LabTechnician);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,14 +32,14 @@ const ReceptionProfile = () => {
   }, [userId]);
 
   useEffect(() => {
-    if (receptionData) setProfile(receptionData);
-  }, [receptionData]);
+    if (technicianData) setProfile(technicianData);
+  }, [technicianData]);
 
-  const initials = profile?.username?.charAt(0).toUpperCase() || 'R';
+  const initials = profile?.username?.charAt(0).toUpperCase() || 'L';
 
   return (
     <>
-      <ReceptionHeader />
+      <LabHeader />
       <Box sx={{ backgroundColor: '#F9F9F9', minHeight: '100vh' }}>
         <Container>
           <Box sx={{ display: 'flex', pt: 6 }}>
@@ -94,4 +95,4 @@ const ReceptionProfile = () => {
   );
 };
 
-export default ReceptionProfile;
+export default LabProfile;
