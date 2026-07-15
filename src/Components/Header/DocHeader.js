@@ -12,7 +12,6 @@ import {
   Drawer,
   Divider,
 } from '@mui/material';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import MenuIcon from '@mui/icons-material/Menu';
 import Logo from '../../assets/Logo.svg';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -91,9 +90,6 @@ const DocHeader = () => {
               gap: '24px',
             }}
           >
-            <IconButton color='default'>
-              <NotificationsNoneIcon />
-            </IconButton>
             <Button
               variant='contained'
               endIcon={<ExpandMoreIcon />}
@@ -253,12 +249,6 @@ const DocHeader = () => {
                 <img src={Logo} alt='Logo' style={{ height: '40px' }} />
               </Box>
               <Divider sx={{ marginBottom: '16px' }} />
-              {/* Notifications Icon */}
-              <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-                <IconButton color='default'>
-                  <NotificationsNoneIcon />
-                </IconButton>
-              </Box>
               {/* Active Button */}
               <Button
                 variant='contained'

@@ -31,7 +31,6 @@ const RegistrationForm = ({ onClose, phoneNumber }) => {
     firstName: '',
     lastName: '',
     mobileNumber: phoneNumber || '',
-    email: '',
     secondaryMobile: '',
     secondaryEmail: '',
     gender: '',
@@ -89,12 +88,6 @@ const RegistrationForm = ({ onClose, phoneNumber }) => {
       newErrors.lastName = 'Last name is required';
     }
 
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Enter a valid email address';
-    }
-
     if (formData.secondaryEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.secondaryEmail)) {
       newErrors.secondaryEmail = 'Enter a valid secondary email address';
     }
@@ -131,7 +124,6 @@ const RegistrationForm = ({ onClose, phoneNumber }) => {
       mobileNo: formData.mobileNumber,
       secMobileNumber: formData.secondaryMobile,
       address: formData.address,
-      email: formData.email,
       secondaryEmail: formData.secondaryEmail,
       pin: formData.pincode,
       city: formData.city,
@@ -262,19 +254,6 @@ const RegistrationForm = ({ onClose, phoneNumber }) => {
                   error={!!errors.mobileNumber}
                   helperText={errors.mobileNumber}
                   disabled={!!formData.mobileNumber}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  name='email'
-                  label='Email Id*'
-                  type='email'
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={!!errors.email}
-                  helperText={errors.email}
                 />
               </Grid>
 
