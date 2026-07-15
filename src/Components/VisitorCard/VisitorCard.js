@@ -166,8 +166,8 @@ const VisitorCard = () => {
               Select a Month
             </MenuItem>
             {labels.map((month, idx) => (
-              <MenuItem key={month} value={idx}>
-                {month.split(" ")[0]}
+              <MenuItem key={month + idx} value={idx}>
+                {month}
               </MenuItem>
             ))}
           </Select>
