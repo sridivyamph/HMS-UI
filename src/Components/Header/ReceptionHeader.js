@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import { useSelector, useDispatch } from 'react-redux';
 import { appUserDataCall, appUserIdCall } from '../../Redux/Modules/Reception/ReceptionThunk';
 import { useNavigate } from 'react-router-dom';
@@ -97,10 +96,6 @@ const ReceptionHeader = () => {
               gap: '24px',
             }}
           >
-            <IconButton color='default'>
-              <NotificationsNoneIcon />
-            </IconButton>
-
             <Box
               sx={{
                 display: 'flex',

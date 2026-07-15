@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   AppBar, Toolbar, Box, IconButton, Avatar, Menu, MenuItem, Container, Button,
 } from '@mui/material';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import Logo from '../../assets/Logo.svg';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +44,6 @@ const AdminHeader = () => {
           </Box>
 
           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: '24px' }}>
-            <IconButton color='default'><NotificationsNoneIcon /></IconButton>
             <Box
               sx={{
                 display: 'flex',
