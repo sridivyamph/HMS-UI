@@ -611,17 +611,29 @@ const ViewPatientProfile = () => {
             width: '90%',
             maxWidth: 600,
             bgcolor: 'background.paper',
-            borderRadius: 3,
-            boxShadow: 24,
+            borderRadius: 4,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
             p: 4,
           }}
         >
           {/* Header */}
-          <Box display='flex' justifyContent='space-between' alignItems='center' mb={3}>
-            <Typography variant='h6' fontWeight={600}>
-              Add Prescription
-            </Typography>
-            <IconButton onClick={() => setPrescriptionModal(false)}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
+              pb: 2,
+              borderBottom: '1px solid #E8E8E8',
+            }}
+          >
+            <Box display='flex' alignItems='center' gap={1}>
+              <EditIcon sx={{ color: '#04BA8E', fontSize: 22 }} />
+              <Typography variant='h6' fontWeight={600} sx={{ color: '#2B2A29' }}>
+                Add Prescription
+              </Typography>
+            </Box>
+            <IconButton onClick={() => setPrescriptionModal(false)} sx={{ color: '#999' }}>
               <CloseIcon />
             </IconButton>
           </Box>
@@ -630,9 +642,10 @@ const ViewPatientProfile = () => {
           {selectedAppointment && (
             <Box
               sx={{
-                bgcolor: '#F9FAFA',
-                borderRadius: 2,
-                p: 2,
+                bgcolor: '#F5FCFA',
+                borderRadius: 3,
+                border: '1px solid #E0F2EE',
+                p: 2.5,
                 mb: 3,
               }}
             >
@@ -664,17 +677,50 @@ const ViewPatientProfile = () => {
               Prescription
             </Typography>
             <TextField
-              placeholder='Add Prescription'
+              placeholder='Enter prescription details...'
               variant='outlined'
               fullWidth
               multiline
-              rows={4}
+              rows={6}
               value={prescription}
               onChange={(e) => setPrescriptionText(e.target.value)}
               inputProps={{ maxLength: 240 }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                  backgroundColor: '#F9FAFA',
+                  padding: 1.5,
+                  '& fieldset': { borderColor: '#E0E0E0' },
+                  '&:hover fieldset': { borderColor: '#04BA8E' },
+                  '&.Mui-focused fieldset': { borderColor: '#04BA8E', borderWidth: 2 },
+                },
+                '& .MuiOutlinedInput-input': {
+                  fontSize: '15px',
+                  lineHeight: 1.6,
+                },
+              }}
             />
-            <Box textAlign='right' mt={0.5}>
-              <Typography variant='caption' color='textSecondary'>
+            <Box display='flex' alignItems='center' gap={1} mt={1}>
+              <Box
+                sx={{
+                  flex: 1,
+                  height: 4,
+                  borderRadius: 2,
+                  backgroundColor: '#E0E0E0',
+                  overflow: 'hidden',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: `${(prescription.length / 240) * 100}%`,
+                    height: '100%',
+                    borderRadius: 2,
+                    backgroundColor: prescription.length > 200 ? '#FF6B6B' : '#04BA8E',
+                    transition: 'width 0.2s ease, background-color 0.2s ease',
+                  }}
+                />
+              </Box>
+              <Typography variant='caption' color='textSecondary' sx={{ minWidth: 45, textAlign: 'right' }}>
                 {prescription.length}/240
               </Typography>
             </Box>
@@ -685,24 +731,23 @@ const ViewPatientProfile = () => {
             fullWidth
             variant='contained'
             sx={{
-              backgroundColor: '#04BA8E',
+              backgroundColor: prescription.trim() ? '#04BA8E' : '#B2DFDB',
               color: '#fff',
-              display: { xs: 'none', md: 'block' },
-
-              padding: '10px 56px',
-              borderRadius: '8px',
-              fontWeight: 500,
-              fontSize: '18px',
-              textTransform: 'capitalize',
+              py: 1.5,
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: '16px',
+              textTransform: 'none',
+              boxShadow: prescription.trim() ? '0 4px 12px rgba(4, 186, 142, 0.3)' : 'none',
               '&:hover': {
-                // Keep the background color the same on hover
-                backgroundColor: '#04BA8E', // Same as default
+                backgroundColor: '#039d78',
+                boxShadow: '0 4px 12px rgba(4, 186, 142, 0.3)',
               },
             }}
             onClick={handleSavePrescription}
             disabled={!prescription.trim()}
           >
-            Save
+            Save Prescription
           </Button>
         </Box>
       </Modal>
