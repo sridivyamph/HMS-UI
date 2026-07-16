@@ -115,11 +115,15 @@ const RegistrationForm = ({ onClose, phoneNumber }) => {
       return;
     }
 
-    // Submit data
+    const age = formData.dob
+      ? Math.floor((new Date() - new Date(formData.dob)) / (365.25 * 24 * 60 * 60 * 1000))
+      : '';
+
     const patientData = {
       patientId: registrationNumber,
       name: `${formData.firstName} ${formData.lastName}`,
       dateOfBirth: formData.dob,
+      age,
       gender: formData.gender,
       mobileNo: formData.mobileNumber,
       secMobileNumber: formData.secondaryMobile,

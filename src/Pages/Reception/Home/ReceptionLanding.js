@@ -220,6 +220,9 @@ const ReceptionLanding = () => {
           patientId: regNo,
           name: formData.name,
           dateOfBirth: formData.dob,
+          age: formData.dob
+            ? Math.floor((new Date() - new Date(formData.dob)) / (365.25 * 24 * 60 * 60 * 1000))
+            : '',
           gender: formData.sex,
           mobileNo: formData.mobileNumber,
         },
