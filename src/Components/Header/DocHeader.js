@@ -13,6 +13,7 @@ import Logo from '../../assets/Logo.svg';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate } from 'react-router-dom';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import { getAppUserId, getUserData } from '../../Services/DoctorServices';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateDoctorOriginalId } from '../../Redux/Modules/Doctor/DoctorSlice';
@@ -140,9 +141,12 @@ const DocHeader = () => {
                     },
                   }}
                 >
-                  <MenuItem onClick={handleLogout}>
-                    <LogoutOutlinedIcon sx={{ fontSize: 20, mr: 1 }} /> Sign Out
-                  </MenuItem>
+          <MenuItem onClick={() => { navigate('/doctor/profile'); setAnchorEl(null); }}>
+            <AccountCircleOutlinedIcon sx={{ fontSize: 20, mr: 1 }} /> Profile
+          </MenuItem>
+          <MenuItem onClick={handleLogout}>
+            <LogoutOutlinedIcon sx={{ fontSize: 20, mr: 1 }} /> Sign Out
+          </MenuItem>
                 </Menu>
               </Box>
             </Box>

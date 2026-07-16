@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import { useSelector, useDispatch } from 'react-redux';
 import { appUserDataCall, appUserIdCall } from '../../Redux/Modules/LabTechnician/LabThunk';
 import { useNavigate } from 'react-router-dom';
@@ -172,6 +173,9 @@ const LabHeader = () => {
                     },
                   }}
                 >
+                  <MenuItem onClick={() => { navigate('/lab/profile'); setAnchorEl(null); }}>
+                    <AccountCircleOutlinedIcon sx={{ fontSize: 20, mr: 1 }} /> Profile
+                  </MenuItem>
                   <MenuItem onClick={handleLogout}>
                     <LogoutOutlinedIcon sx={{ fontSize: 20, mr: 1 }} /> Sign Out
                   </MenuItem>
