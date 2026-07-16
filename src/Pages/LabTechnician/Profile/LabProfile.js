@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Container, Grid, Typography, Card, CardContent, Avatar, Button
+  Box, Container, Grid, Typography, Card, CardContent, Avatar, Button, Chip
 } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import LabHeader from '../../../Components/Header/LabHeader';
 import Footer from '../../../Components/Footer/footer';
 import { useNavigate } from 'react-router-dom';
-import { getAppUserId, getUserData } from '../../../Services/LabServices';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { appUserDataCall, appUserIdCall } from '../../../Redux/Modules/LabTechnician/LabThunk';
+
+const Field = ({ label, value }) => (
+  <Box sx={{ display: 'flex', mb: 1 }}>
+    <Typography variant='body2' color='#6E6E6E' sx={{ minWidth: 140, flexShrink: 0 }}>
+      {label}
+    </Typography>
+    <Typography variant='body2' color='#2B2A29' fontWeight={500}>
+      {value || 'N/A'}
+    </Typography>
+  </Box>
+);
 
 const LabProfile = () => {
   const navigate = useNavigate();
@@ -61,30 +71,30 @@ const LabProfile = () => {
                       {initials}
                     </Avatar>
                     <Typography variant='h6' fontWeight={600}>{profile.username}</Typography>
-                    <Typography variant='body2' color='textSecondary'>{profile.referenceType}</Typography>
+                    <Typography variant='body2' color='textSecondary' sx={{ mb: 1 }}>{profile.referenceType}</Typography>
+                    <Chip
+                      label={profile.isActive ? 'Active' : 'Inactive'}
+                      size='small'
+                      color={profile.isActive ? 'success' : 'default'}
+                      variant='outlined'
+                    />
                   </CardContent>
                 </Card>
               </Grid>
 
               <Grid item xs={12} md={9}>
-                <Box sx={{ backgroundColor: '#fff', borderRadius: 2, py: 3, px: 3 }}>
-                  <Typography variant='h6' fontWeight={600} mb={3}>Account Information</Typography>
-                  <Grid container spacing={2}>
-                    {[
-                      { label: 'Username', value: profile.username },
-                      { label: 'Role', value: profile.referenceType },
-                      { label: 'Hospital ID', value: profile.hospId },
-                      { label: 'Status', value: profile.isActive ? 'Active' : 'Inactive' },
-                      { label: 'Created', value: profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A' },
-                      { label: 'Updated', value: profile.updatedAt ? new Date(profile.updatedAt).toLocaleDateString() : 'N/A' },
-                    ].map((r, i) => (
-                      <React.Fragment key={i}>
-                        <Grid item xs={4}><Typography variant='body2' color='#6E6E6E'>{r.label}</Typography></Grid>
-                        <Grid item xs={8}><Typography variant='body2' color='#2B2A29'>{r.value || 'N/A'}</Typography></Grid>
-                      </React.Fragment>
-                    ))}
-                  </Grid>
-                </Box>
+                <Card sx={{ borderRadius: 2 }}>
+                  <CardContent sx={{ p: 4 }}>
+                    <Typography variant='subtitle2' color='#04BA8E' fontWeight={700} sx={{ mb: 2, letterSpacing: 0.5 }}>
+                      ACCOUNT INFORMATION
+                    </Typography>
+                    <Field label='Username' value={profile.username} />
+                    <Field label='Role' value={profile.referenceType} />
+                    <Field label='Hospital ID' value={profile.hospId} />
+                    <Field label='Created' value={profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'} />
+                    <Field label='Updated' value={profile.updatedAt ? new Date(profile.updatedAt).toLocaleDateString() : 'N/A'} />
+                  </CardContent>
+                </Card>
               </Grid>
             </Grid>
           )}
