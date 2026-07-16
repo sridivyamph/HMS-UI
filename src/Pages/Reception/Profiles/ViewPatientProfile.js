@@ -69,18 +69,29 @@ const ReceptionPatientProfile = () => {
 
   const [rawUser, setRawUser] = useState(null);
 
+  const calculateAge = (dob) => {
+    if (!dob) return 'N/A';
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+    return age;
+  };
+
   useEffect(() => {
     setLoadingUser(true);
     setUserError('');
     getPatientProfileById(id).then((val) => {
       const userObject = val.data;
       setRawUser(userObject);
+      const dob = userObject.dateOfBirth || userObject.dob;
       const userDetailsArray = [
         { label: 'Name', value: userObject.name || 'N/A', icon: <PersonIcon fontSize='small' /> },
         { label: 'Gender', value: userObject.gender || 'N/A', icon: <WcIcon fontSize='small' /> },
-        { label: 'DOB', value: userObject.dateOfBirth || 'N/A', icon: <CakeIcon fontSize='small' /> },
+        { label: 'Age', value: calculateAge(dob), icon: <CakeIcon fontSize='small' /> },
         { label: 'Occupation', value: userObject.occupation || 'N/A', icon: <WorkIcon fontSize='small' /> },
-        { label: 'Email', value: userObject.email || 'N/A', icon: <EmailIcon fontSize='small' /> },
+        { label: 'Email', value: userObject.email || userObject.secondaryEmail || 'N/A', icon: <EmailIcon fontSize='small' /> },
         { label: 'Phone', value: userObject.mobileNo || 'N/A', icon: <PhoneIcon fontSize='small' /> },
       ];
       setuserData(userDetailsArray);

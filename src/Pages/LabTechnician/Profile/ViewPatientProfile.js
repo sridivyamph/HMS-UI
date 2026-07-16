@@ -121,14 +121,25 @@ const LabPatientProfile = () => {
     setSelectedReports(result.payload.content);
   };
 
+  const calculateAge = (dob) => {
+    if (!dob) return 'N/A';
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+    return age;
+  };
+
   useEffect(() => {
     getPatientProfileById(id).then((val) => {
       const userObject = val.data;
+      const dob = userObject.dateOfBirth || userObject.dob;
       const userDetailsArray = [
         { label: 'Name', value: userObject.name || 'N/A' },
         { label: 'Gender', value: userObject.gender || 'N/A' },
-        { label: 'DOB', value: userObject.dateOfBirth || 'N/A' },
-        { label: 'Email', value: userObject.email || 'N/A' },
+        { label: 'Age', value: calculateAge(dob) },
+        { label: 'Email', value: userObject.email || userObject.secondaryEmail || 'N/A' },
         { label: 'Phone', value: userObject.mobileNo || 'N/A' },
       ];
       setuserData(userDetailsArray);

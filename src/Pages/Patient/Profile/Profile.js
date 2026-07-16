@@ -97,7 +97,7 @@ const Profile = () => {
         const userObject = val.data;
         setRawUser(userObject);
 
-        const age = calculateAge(userObject.dateOfBirth);
+        const age = calculateAge(userObject.dateOfBirth || userObject.dob);
 
         const userDetailsArray = [
           { label: 'Name', value: userObject.name || 'N/A', icon: <PersonIcon fontSize='small' /> },
@@ -158,12 +158,15 @@ const Profile = () => {
 
   const handleEditSubmit = async (updatedData) => {
     const regNo = localStorage.getItem('regNo');
+    const age = updatedData.dob
+      ? Math.floor((new Date() - new Date(updatedData.dob)) / (365.25 * 24 * 60 * 60 * 1000))
+      : '';
     try {
-      await dispatch(updatePatientDetailsThunk({ param: regNo, payload: updatedData })).unwrap();
+      await dispatch(updatePatientDetailsThunk({ param: regNo, payload: { ...updatedData, age } })).unwrap();
       const val = await getPatientProfileById(regNo);
       const userObject = val.data;
       setRawUser(userObject);
-      const age = calculateAge(userObject.dateOfBirth);
+      const age = calculateAge(userObject.dateOfBirth || userObject.dob);
       setuserData([
         { label: 'Name', value: userObject.name || 'N/A', icon: <PersonIcon fontSize='small' /> },
         { label: 'Gender', value: userObject.gender || 'N/A', icon: <WcIcon fontSize='small' /> },
@@ -267,7 +270,7 @@ const Profile = () => {
                     onClick={() => {
                       setEditForm({
                         name: rawUser?.name || '',
-                        dob: rawUser?.dateOfBirth || '',
+                        dob: rawUser?.dateOfBirth || rawUser?.dob || '',
                         gender: rawUser?.gender || '',
                         secondaryMobile: rawUser?.secMobileNumber || '',
                         secondaryEmail: rawUser?.secondaryEmail || '',

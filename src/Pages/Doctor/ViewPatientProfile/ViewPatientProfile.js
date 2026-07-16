@@ -56,17 +56,26 @@ const ViewPatientProfile = () => {
   const docName = doctorResponse.doctorData.doctorName;
   // const [updatedMedicalData,setUpdateMedicaldata] = useState([]);
   const [userallData, setuserallData] = useState([]);
+  const calculateAge = (dob) => {
+    if (!dob) return 'N/A';
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+    return age;
+  };
+
   useEffect(() => {
     getPatientProfileById(userId).then((val) => {
-      console.log(val.data, 'Value');
       const userObject = val.data;
-      console.log(userObject, 'userObject');
+      const dob = userObject.dateOfBirth || userObject.dob;
       const userDetailsArray = [
         { label: 'Name', value: userObject.name || 'N/A' },
         { label: 'Gender', value: userObject.gender || 'N/A' },
-        { label: 'DOB', value: userObject.dateOfBirth || 'N/A' },
+        { label: 'Age', value: calculateAge(dob) },
         { label: 'Occupation', value: userObject.occupation || 'N/A' },
-        { label: 'Email', value: userObject.email || 'N/A' },
+        { label: 'Email', value: userObject.email || userObject.secondaryEmail || 'N/A' },
         { label: 'Phone', value: userObject.mobileNo || 'N/A' },
       ];
       setuserData(userDetailsArray);
