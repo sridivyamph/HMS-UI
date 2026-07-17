@@ -44,6 +44,8 @@ const initialState = {
   bookedDoctorDetails: [],
   // CALL appointment API
   callAppointment: false,
+  // Booking invoice data
+  bookingAmount: null,
 };
 
 export const homeSlice = createSlice({
@@ -65,6 +67,9 @@ export const homeSlice = createSlice({
     },
     updateAppointment: (state, action) => {
       state.callAppointment = action.payload;
+    },
+    updateBookingAmount: (state, action) => {
+      state.bookingAmount = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -242,6 +247,7 @@ export const {
   updateUserLogin,
   updateBackdrop,
   updateAppointment,
+  updateBookingAmount,
 } = homeSlice.actions;
 
 export default homeSlice.reducer;

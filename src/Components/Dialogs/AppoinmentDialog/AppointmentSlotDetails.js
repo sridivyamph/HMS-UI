@@ -35,7 +35,7 @@ import {
 } from '../../../Redux/Modules/Patient/HomeThunk';
 import { createOrder, paymentConfirmation } from '../../../Services/PatientServices';
 import { rescheduleAppointments } from '../../../Services/DoctorServices';
-import { updateBackdrop } from '../../../Redux/Modules/Patient/HomeSlice';
+import { updateBackdrop, updateBookingAmount } from '../../../Redux/Modules/Patient/HomeSlice';
 import ErrorMessage from '../../ErrorMessage/errorMessage';
 
 function AppointmentSlotDetails({
@@ -139,6 +139,7 @@ function AppointmentSlotDetails({
     createOrder(payload)
       .then((res) => {
         const { amount, currency, razorpayKey, orderId } = res.data;
+        dispatch(updateBookingAmount(amount));
 
         setrazorPayKey(razorpayKey);
         const onPaymentSuccess = (response) => {
@@ -256,7 +257,9 @@ function AppointmentSlotDetails({
       });
     } else if (paymentMode === "hospital") {
       try {
-        await dispatch(bookAppointmentThunk(payload)).unwrap();
+        const bookingResult = await dispatch(bookAppointmentThunk(payload)).unwrap();
+        const amount = bookingResult?.amount || 50000;
+        dispatch(updateBookingAmount(amount));
         paymentSuccess();
       } catch (error) {
         setError(error?.response?.data?.errorMessage || 'Something went wrong');
@@ -268,7 +271,8 @@ function AppointmentSlotDetails({
           bookAppointmentThunk(payload)
         ).unwrap();
 
-        console.log("Booking success", bookingResult);
+        const amount = bookingResult?.amount || 50000;
+        dispatch(updateBookingAmount(amount));
 
         handlePayment(bookingResult);
       } catch (error) {
