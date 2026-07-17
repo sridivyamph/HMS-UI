@@ -46,6 +46,7 @@ const initialState = {
   callAppointment: false,
   // Booking invoice data
   bookingAmount: null,
+  bookingReason: '',
 };
 
 export const homeSlice = createSlice({
@@ -70,6 +71,14 @@ export const homeSlice = createSlice({
     },
     updateBookingAmount: (state, action) => {
       state.bookingAmount = action.payload;
+    },
+    updateBookingReason: (state, action) => {
+      state.bookingReason = action.payload;
+    },
+    updateBookingPaymentStatus: (state, action) => {
+      if (state.bookedDoctorDetails) {
+        state.bookedDoctorDetails.paymentStatus = action.payload;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -248,6 +257,8 @@ export const {
   updateBackdrop,
   updateAppointment,
   updateBookingAmount,
+  updateBookingReason,
+  updateBookingPaymentStatus,
 } = homeSlice.actions;
 
 export default homeSlice.reducer;
