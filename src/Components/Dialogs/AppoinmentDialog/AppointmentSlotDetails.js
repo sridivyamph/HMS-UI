@@ -35,7 +35,10 @@ import {
 } from '../../../Redux/Modules/Patient/HomeThunk';
 import { createOrder, paymentConfirmation } from '../../../Services/PatientServices';
 import { rescheduleAppointments } from '../../../Services/DoctorServices';
-import { updateBackdrop, updateBookingAmount } from '../../../Redux/Modules/Patient/HomeSlice';
+import {
+  updateBackdrop, updateBookingAmount,
+  updateBookingReason, updateBookingPaymentStatus,
+} from '../../../Redux/Modules/Patient/HomeSlice';
 import ErrorMessage from '../../ErrorMessage/errorMessage';
 
 function AppointmentSlotDetails({
@@ -199,7 +202,7 @@ function AppointmentSlotDetails({
     console.log("payLoad", payload);
     paymentConfirmation(payload).then((res) => {
       dispatch(updateBackdrop(false));
-      console.log(res, "Repsoen");
+      dispatch(updateBookingPaymentStatus('Online Paid'));
       paymentSuccess();
     }).catch((err) => {
       dispatch(updateBackdrop(false));
@@ -227,6 +230,8 @@ function AppointmentSlotDetails({
     };
 
     const userId = localStorage.getItem("regNo");
+
+    dispatch(updateBookingReason(reasonForVisit));
 
     const payload = {
       doctorId: doctorId,
