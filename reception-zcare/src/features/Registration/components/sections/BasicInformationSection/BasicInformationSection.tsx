@@ -1,15 +1,13 @@
 import { ChevronDown } from 'lucide-react';
-import { Input } from '../../../components/Input/Input';
-import { Select } from '../../../components/Select/Select';
-import { Badge } from '../../../components/Badge/Badge';
-import { PhotoUpload } from '../../../components/PhotoUpload/PhotoUpload';
+import { Input, Select, Badge } from '@/components/ui';
+import { PhotoUpload } from '@/components/common';
 import {
   TITLE_OPTIONS,
   GENDER_OPTIONS,
   COUNTRY_CODE_OPTIONS,
   NATIONALITY_OPTIONS,
-} from '../constants/dropdownOptions';
-import type { PatientFormData } from '../types/patient';
+} from '../../../constants';
+import type { PatientFormData } from '../../../types';
 
 interface Props {
   formData: PatientFormData;

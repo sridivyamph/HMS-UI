@@ -1,6 +1,5 @@
-import { Badge } from '../../../components/Badge/Badge';
-import { CheckboxPill } from '../../../components/CheckboxPill/CheckboxPill';
-import type { PatientFormData, IdentifiableKey } from '../types/patient';
+import { Badge, CheckboxPill } from '@/components/ui';
+import type { PatientFormData, IdentifiableKey } from '../../../types';
 
 interface Props {
   formData: PatientFormData;

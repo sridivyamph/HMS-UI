@@ -33,6 +33,74 @@ const INITIAL_FORM_STATE: PatientFormData = {
   hearingImpaired: false,
   visuallyImpaired: false,
   speechImpaired: false,
+  email: '',
+  alternateEmail: '',
+  communicationType: '',
+  addressLine1: '',
+  addressLine2: '',
+  addressLine3: '',
+  country: '',
+  state: '',
+  city: '',
+  pincode: '',
+  identifyingDocumentName: '',
+  documentNumber: '',
+  issuedPlace: '',
+  issuedDate: '',
+  validFrom: '',
+  validTo: '',
+  documentCopyUrl: null,
+  documentCopyName: null,
+  tpa: false,
+  miscCompanyType: false,
+  showExpiredPlans: false,
+  insurance: '',
+  corporate: '',
+  companyType: '',
+  companyName: '',
+  planName: '',
+  priority: '',
+  employeeNo: '',
+  membershipNo: '',
+  policyNo: '',
+  policyHolder: '',
+  insuranceValidFrom: '',
+  insuranceValidTo: '',
+  certificateNo: '',
+  dependentMemberNo: '',
+  insuranceRelation: '',
+  emergencyType: '',
+  emergencyMrNo: '',
+  emergencyFirstName: '',
+  emergencyMiddleName: '',
+  emergencyLastName: '',
+  emergencyFamilyName: '',
+  emergencyGender: '',
+  emergencyRelation: '',
+  emergencyMobileCountryCode: '+91',
+  emergencyMobileNo: '',
+  emergencyAltCountryCode: '+91',
+  emergencyAltNo: '',
+  emergencyEmail: '',
+  emergencyAlternateEmail: '',
+  emergencySameAsPatientAddress: false,
+  emergencyAddressLine1: '',
+  emergencyAddressLine2: '',
+  emergencyAddressLine3: '',
+  emergencyCountry: '',
+  emergencyState: '',
+  emergencyCity: '',
+  emergencyPincode: '',
+  linkFamilyMrNo: '',
+  linkFamilyFullName: '',
+  linkFamilyRelation: '',
+  linkedFamilyMembers: [],
+  documentCategory: '',
+  documentSubCategory: '',
+  documentFileName: null,
+  documentFileUrl: null,
+  supportingDocuments: [],
+  remarks: '',
 };
 
 function calculateAge(dob: string): string {
@@ -76,9 +144,111 @@ export function usePatientForm() {
     [],
   );
 
+  const handleDocumentCopyUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        setFormData((prev) => ({
+          ...prev,
+          documentCopyUrl: url,
+          documentCopyName: file.name,
+        }));
+      }
+    },
+    [],
+  );
+
+  const handleSupportingDocumentUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        setFormData((prev) => ({
+          ...prev,
+          documentFileUrl: url,
+          documentFileName: file.name,
+        }));
+      }
+    },
+    [],
+  );
+
+  const addLinkedFamilyMember = useCallback(() => {
+    setFormData((prev) => {
+      if (!prev.linkFamilyMrNo.trim() || !prev.linkFamilyRelation) return prev;
+      return {
+        ...prev,
+        linkedFamilyMembers: [
+          ...prev.linkedFamilyMembers,
+          {
+            id: crypto.randomUUID(),
+            mrNo: prev.linkFamilyMrNo.trim(),
+            fullName: prev.linkFamilyFullName.trim() || 'Unknown',
+            relation: prev.linkFamilyRelation,
+          },
+        ],
+        linkFamilyMrNo: '',
+        linkFamilyFullName: '',
+        linkFamilyRelation: '',
+      };
+    });
+  }, []);
+
+  const removeLinkedFamilyMember = useCallback((id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      linkedFamilyMembers: prev.linkedFamilyMembers.filter((m) => m.id !== id),
+    }));
+  }, []);
+
+  const addSupportingDocument = useCallback(() => {
+    setFormData((prev) => {
+      if (!prev.documentCategory || !prev.documentSubCategory || !prev.documentFileName) {
+        return prev;
+      }
+      return {
+        ...prev,
+        supportingDocuments: [
+          ...prev.supportingDocuments,
+          {
+            id: crypto.randomUUID(),
+            category: prev.documentCategory,
+            subCategory: prev.documentSubCategory,
+            fileName: prev.documentFileName,
+            fileUrl: prev.documentFileUrl ?? '',
+          },
+        ],
+        documentCategory: '',
+        documentSubCategory: '',
+        documentFileName: null,
+        documentFileUrl: null,
+      };
+    });
+  }, []);
+
+  const removeSupportingDocument = useCallback((id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      supportingDocuments: prev.supportingDocuments.filter((d) => d.id !== id),
+    }));
+  }, []);
+
   const reset = useCallback(() => {
     setFormData(INITIAL_FORM_STATE);
   }, []);
 
-  return { formData, handleChange, handleDobChange, handlePhotoUpload, reset };
+  return {
+    formData,
+    handleChange,
+    handleDobChange,
+    handlePhotoUpload,
+    handleDocumentCopyUpload,
+    handleSupportingDocumentUpload,
+    addLinkedFamilyMember,
+    removeLinkedFamilyMember,
+    addSupportingDocument,
+    removeSupportingDocument,
+    reset,
+  };
 }

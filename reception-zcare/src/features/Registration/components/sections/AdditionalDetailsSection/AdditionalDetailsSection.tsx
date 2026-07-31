@@ -1,6 +1,3 @@
-import { Input } from '../../../components/Input/Input';
-import { Select } from '../../../components/Select/Select';
-import { Badge } from '../../../components/Badge/Badge';
 import {
   MARITAL_STATUS_OPTIONS,
   BLOOD_GROUP_OPTIONS,
@@ -10,8 +7,9 @@ import {
   LANGUAGE_OPTIONS,
   LIVING_ARRANGEMENT_OPTIONS,
   PREFERRED_LANGUAGE_OPTIONS,
-} from '../constants/dropdownOptions';
-import type { PatientFormData } from '../types/patient';
+} from '../../../constants';
+import { Input, Select, Badge } from '@/components/ui';
+import type { PatientFormData } from '../../../types';
 
 interface Props {
   formData: PatientFormData;

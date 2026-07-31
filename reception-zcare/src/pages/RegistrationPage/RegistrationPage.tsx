@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import Header from '../../components/Header/Header';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import { PatientInformationForm } from '../../features/Registration/pages/PatientInformationForm';
+import Header from '@/components/layout/Header/Header';
+import Sidebar from '@/components/layout/Sidebar/Sidebar';
+import { PatientInformationForm } from '@/features/Registration/pages/PatientInformationForm';
 
 export function RegistrationPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
